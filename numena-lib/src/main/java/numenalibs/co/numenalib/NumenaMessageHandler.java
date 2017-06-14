@@ -1,6 +1,7 @@
 package numenalibs.co.numenalib;
 
 
+import android.content.pm.LauncherApps;
 import android.util.Log;
 
 import java.util.concurrent.Callable;
@@ -12,6 +13,7 @@ import messages.Serverhello.ServerHello.Handshake;
 import numenalibs.co.numenalib.encryption.EncryptionManager;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
+import numenalibs.co.numenalib.models.NumenaMethod;
 import numenalibs.co.numenalib.networking.SingleMessageManager;
 import numenalibs.co.numenalib.protocol.ProtocolManager;
 import numenalibs.co.numenalib.tools.ValuesManager;
@@ -52,25 +54,28 @@ public class NumenaMessageHandler {
 
 
     public void initConnection(){
-        ResultsListener listener = setupOpeningListener(new Callable<byte[]>() {
-            @Override
-            public byte[] call() throws Exception {
-                Log.d("HEY", "HEY");
-                return null;
-            }
-        });
+        ResultsListener listener = setupOpeningListener(new MyCallback());
         singleMessageManager.setListener(listener);
         singleMessageManager.openWebsocket();
-
     }
 
-    private ResultsListener setupOpeningListener(final Callable<byte[]> inputFunc){
+    class MyCallback extends NumenaMethod {
+
+        @Override
+        public Void call() {
+            Log.d("Done", "RESULT" + getResult());
+            return null;
+        }
+    }
+
+    private ResultsListener setupOpeningListener(final NumenaMethod numenaMethod){
         ResultsListener openingListener = new ResultsListener<byte[]>() {
             @Override
             public void onSuccess(byte[] result) {
                 try {
                     handleServerHello(result);
-                    inputFunc.call();
+                    numenaMethod.setResult(result);
+                    numenaMethod.call();
                 }  catch (Exception e) {
                     e.printStackTrace();
                 }

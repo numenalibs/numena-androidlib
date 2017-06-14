@@ -1,13 +1,21 @@
 package numenalibs.co.numenalib.models;
 
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 
-public class NumenaMethod implements Callable<byte[]> {
+import java.util.concurrent.Callable;
 
+public abstract class NumenaMethod<T> implements Callable<Void> {
+    T result;
 
-    @Override
-    public byte[] call() throws Exception {
-        return new byte[0];
+    public void setResult (T result) {
+        this.result = result;
     }
+
+    public T getResult(){
+        return result;
+    }
+
+    public abstract Void call ();
 }
