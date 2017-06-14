@@ -4,7 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import numenalibs.co.numenalib.Numena;
-import numenalibs.co.numenalib.NumenaLibDebug;
+import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -12,6 +12,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Numena.getInstance().getMessageHandler().initConnection();
 
     }
 }

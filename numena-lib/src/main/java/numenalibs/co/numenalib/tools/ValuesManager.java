@@ -9,11 +9,12 @@ public class ValuesManager implements NumenaCommunicatorInterface {
 
     private byte[] serverConnectionPublicKey;
     private byte[] serverIdentityPublicKey;
-    private byte[] whitelist;
+    private byte[] whitelist = Utils.hexStringToByteArray("6c7771fdc6d83b641ad4e994a9c9bdb6e786d1b5e6953eaf1fa63b0223c156e4");;
     private byte[] clientConnectionPublicKey;
     private byte[] clientConnectionSecretKey;
     private int localNonce;
     private int remoteNonce;
+    private String connectionUrl = "ws://dev.numena.co:8000";
     HashMap<String, byte[]> organisationKeys = new HashMap<>();
     HashMap<String, byte[]> appKeys = new HashMap<>();
     public static final int CRYPTO_BOX_MACBYTES = 16;
@@ -27,6 +28,14 @@ public class ValuesManager implements NumenaCommunicatorInterface {
             instance.setRemoteNonce(1);
         }
         return instance;
+    }
+
+    public String getConnectionUrl() {
+        return connectionUrl;
+    }
+
+    public void setConnectionUrl(String connectionUrl) {
+        this.connectionUrl = connectionUrl;
     }
 
     @Override

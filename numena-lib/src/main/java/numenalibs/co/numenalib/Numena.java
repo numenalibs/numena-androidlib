@@ -1,25 +1,30 @@
 package numenalibs.co.numenalib;
 
 
+import org.libsodium.jni.NaCl;
+import org.libsodium.jni.Sodium;
 
 public class Numena {
 
     private static Numena instance;
-    private NumenaMessageHandler numenaCore;
+    private NumenaMessageHandler messageHandler;
 
     public static Numena getInstance(){
         if(instance == null){
             instance = new Numena();
-            instance.setNumenaCore(new NumenaMessageHandler());
+            instance.setMessageHandler(new NumenaMessageHandler());
+            Sodium sodium = NaCl.sodium();
         }
         return instance;
     }
 
-    public NumenaMessageHandler getNumenaCore() {
-        return numenaCore;
+    public NumenaMessageHandler getMessageHandler() {
+        return messageHandler;
     }
 
-    public void setNumenaCore(NumenaMessageHandler numenaCore) {
-        this.numenaCore = numenaCore;
+    public void setMessageHandler(NumenaMessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
     }
+
+
 }
