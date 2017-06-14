@@ -1,6 +1,7 @@
 package numenalibs.co.numenalib.tools;
 
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import numenalibs.co.numenalib.interfaces.NumenaCommunicatorInterface;
@@ -12,12 +13,15 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     private byte[] whitelist = Utils.hexStringToByteArray("6c7771fdc6d83b641ad4e994a9c9bdb6e786d1b5e6953eaf1fa63b0223c156e4");;
     private byte[] clientConnectionPublicKey;
     private byte[] clientConnectionSecretKey;
+    private byte[] clientIdentityPublicKey;
+    private byte[] clientIdentitySecretKey;
     private int localNonce;
     private int remoteNonce;
+    private boolean isConnectionToOrganizationServer = false;
     private String connectionUrl = "ws://dev.numena.co:8000";
     HashMap<String, byte[]> organisationKeys = new HashMap<>();
     HashMap<String, byte[]> appKeys = new HashMap<>();
-    public static final int CRYPTO_BOX_MACBYTES = 16;
+
 
     private static ValuesManager instance;
 
@@ -63,6 +67,30 @@ public class ValuesManager implements NumenaCommunicatorInterface {
 
     }
 
+    public boolean isConnectionToOrganizationServer() {
+        return isConnectionToOrganizationServer;
+    }
+
+    public void setConnectionToOrganizationServer(boolean connectionToOrganizationServer) {
+        isConnectionToOrganizationServer = connectionToOrganizationServer;
+    }
+
+    public byte[] getClientIdentityPublicKey() {
+        return clientIdentityPublicKey;
+    }
+
+    public void setClientIdentityPublicKey(byte[] clientIdentityPublicKey) {
+        this.clientIdentityPublicKey = Arrays.copyOf(clientIdentityPublicKey, clientIdentityPublicKey.length);
+    }
+
+    public byte[] getClientIdentitySecretKey() {
+        return clientIdentitySecretKey;
+    }
+
+    public void setClientIdentitySecretKey(byte[] clientIdentitySecretKey) {
+        this.clientIdentitySecretKey =  Arrays.copyOf(clientIdentitySecretKey, clientIdentitySecretKey.length);
+    }
+
     public int getLocalNonce() {
         return localNonce;
     }
@@ -84,7 +112,7 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     }
 
     public void setServerConnectionPublicKey(byte[] serverConnectionPublicKey) {
-        this.serverConnectionPublicKey = serverConnectionPublicKey;
+        this.serverConnectionPublicKey = Arrays.copyOf(serverConnectionPublicKey, serverConnectionPublicKey.length);
     }
 
     public byte[] getServerIdentityPublicKey() {
@@ -92,7 +120,7 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     }
 
     public void setServerIdentityPublicKey(byte[] serverIdentityPublicKey) {
-        this.serverIdentityPublicKey = serverIdentityPublicKey;
+        this.serverIdentityPublicKey = Arrays.copyOf(serverIdentityPublicKey,serverIdentityPublicKey.length);
     }
 
     public byte[] getWhitelist() {
@@ -100,7 +128,7 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     }
 
     public void setWhitelist(byte[] whitelist) {
-        this.whitelist = whitelist;
+        this.whitelist = Arrays.copyOf(whitelist,whitelist.length);
     }
 
     public byte[] getClientConnectionPublicKey() {
@@ -108,7 +136,7 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     }
 
     public void setClientConnectionPublicKey(byte[] clientConnectionPublicKey) {
-        this.clientConnectionPublicKey = clientConnectionPublicKey;
+        this.clientConnectionPublicKey = Arrays.copyOf(clientConnectionPublicKey,clientConnectionPublicKey.length);
     }
 
     public byte[] getClientConnectionSecretKey() {
@@ -116,7 +144,7 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     }
 
     public void setClientConnectionSecretKey(byte[] clientConnectionSecretKey) {
-        this.clientConnectionSecretKey = clientConnectionSecretKey;
+        this.clientConnectionSecretKey = Arrays.copyOf(clientConnectionSecretKey,clientConnectionSecretKey.length);
     }
 
     public HashMap<String, byte[]> getOrganisationKeys() {

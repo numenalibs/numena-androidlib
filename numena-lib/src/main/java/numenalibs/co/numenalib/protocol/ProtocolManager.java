@@ -19,6 +19,7 @@ import messages.Clienthello;
 import messages.Serverhello.ServerHello;
 import messages.Serverhello.ServerHello.Handshake;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
+import numenalibs.co.numenalib.tools.Constants;
 import numenalibs.co.numenalib.tools.ValuesManager;
 
 import static org.libsodium.jni.Sodium.crypto_box_easy;
@@ -76,86 +77,74 @@ public class ProtocolManager {
         }
     }
 
-//    public Basemessage.BaseMessage packClientHello(byte[] srv_bytes, boolean isConnectionToOrganizationServer) throws packClientHelloException, NoSuchAlgorithmException, InvalidProtocolBufferException {
-//
-//        // 7. Generate a ClientHello.Handshake message and populate the fields
-//        Clienthello.ClientHello.Handshake.Builder client_handshake_builder = Clienthello.ClientHello.Handshake.newBuilder();
-//        // 7.1 Message type
-//        client_handshake_builder.setMessageType("ClientHello.Handshake");
-//        // 7.2 client_connection_public_key
-//
-//        byte[] tempclient_connection_pk = new byte[Sodium.crypto_box_publickeybytes()];
-//        byte[] tempclient_connection_sk = new byte[Sodium.crypto_box_secretkeybytes()];
-//        if (crypto_box_keypair(tempclient_connection_pk, tempclient_connection_sk) != 0) {
-//            throw new packClientHelloException();
-//        }
-//        updateClientConnectionKeys(tempclient_connection_pk, tempclient_connection_sk);
-//        ByteString client_connection_pk = ByteString.copyFrom(getAuthentication().getClientConnectionKeys().getPublickey());
-//
-//        client_handshake_builder.setClientConnectionPublicKey(client_connection_pk);
-//        // 7.3 Hashed server hello
-//        MessageDigest md = MessageDigest.getInstance("SHA-256");
-//        byte[] srvHello = Basemessage.BaseMessage.parseFrom(srv_bytes).getServerHello().toByteArray();
-//        md.update(srvHello);
-//        ByteString hashed_srv_bytes = ByteString.copyFrom(md.digest());
-//        client_handshake_builder.setHashedServerHello(hashed_srv_bytes);
-//        // 7.4 Length of server hello
-//        client_handshake_builder.setLengthOfServerHello(srvHello.length);
-//        // 8. Create a ClientHello.SignedHandshake
-//        Clienthello.ClientHello.SignedHandshake.Builder signed_handshake_builder = Clienthello.ClientHello.SignedHandshake.newBuilder();
-//        // 8.1 Set handshake
-//        Clienthello.ClientHello.Handshake client_handshake = client_handshake_builder.build();
-//        signed_handshake_builder.setHandshake(client_handshake);
-//        byte[] dst_signature = new byte[SodiumConstants.SIGNATURE_BYTES];
-//        int[] dst_signature_length = new int[dst_signature.length];
-//        // 8.2 Check if we're communicating with organization server
-//        if (isConnectionToOrganizationServer) {
-//            // 8.2.1 Set identity_public_key to device_identity_key
-//            signed_handshake_builder.setIdentityPublicKey(ByteString.copyFrom(getAuthentication().getClientIdentityKeys().getPublickey()));
-//            if (crypto_sign_detached(
-//                    dst_signature,
-//                    dst_signature_length,
-//                    client_handshake.toByteArray(),
-//                    client_handshake.toByteArray().length,
-//                    getAuthentication().getClientConnectionKeys().getPublickey()) != 0) {
-//                throw new packClientHelloException();
-//            }
-//            // 8.2.1 Set handshake signature
-//            signed_handshake_builder.setHandshakeSignature(ByteString.copyFrom(dst_signature));
-//        }
-//        Clienthello.ClientHello.SignedHandshake signedHandshake = signed_handshake_builder.build();
-//        byte[] MESSAGE = signedHandshake.toByteArray();
-//        int MESSAGE_LEN = signedHandshake.getSerializedSize();
-//        int CIPHERTEXT_LEN = crypto_box_MACBYTES + MESSAGE_LEN;
-//        byte[] ciphertext = new byte[CIPHERTEXT_LEN];
-//        Clienthello.ClientHello.Builder client_hello_builder = Clienthello.ClientHello.newBuilder();
-//        // 8.3 Set client connection public key
-//        client_hello_builder.setClientConnectionPublicKey(ByteString.copyFrom(getAuthentication().getClientConnectionKeys().getPublickey()));
-//        // 8.4 Set encrypted handshake
-//        byte[] nonce = new byte[SodiumConstants.NONCE_BYTES];
-//        updateSrvConnectionPK(Basemessage.BaseMessage.parseFrom(srv_bytes).getServerHello()
-//                .getHandshake().getServerConnectionPublicKey().toByteArray());
-//        /*
-//         Remember! When testing locally, change srv_connection_pk to client_connection_pk.
-//         crypto_box_easy(ciphertext, MESSAGE, MESSAGE_LEN, nonce,
-//                    bob_publickey, alice_secretkey).
-//         Bob is the server. Alice is us.
-//          */
-//        if (crypto_box_easy(
-//                ciphertext,
-//                MESSAGE,
-//                MESSAGE_LEN,
-//                nonce,
-//                getAuthentication().getServerConnectionKeys().getPublickey(),
-//                getAuthentication().getClientConnectionKeys().getSecretkey()
-//        ) != 0) {
-//            throw new packClientHelloException();
-//        }
-//        client_hello_builder.setEncryptedHandshake(ByteString.copyFrom(ciphertext));
-//        Clienthello.ClientHello client_hello = client_hello_builder.build();
-//        Basemessage.BaseMessage.Builder basemessage_builder = Basemessage.BaseMessage.newBuilder();
-//        basemessage_builder.setType(Basemessage.BaseMessage.Type.CLIENTHELLO);
-//        basemessage_builder.setClientHello(client_hello);
-//        return basemessage_builder.build();
-//    }
+    public void buildClientHello(byte[] msg, ServerHello serverHello) throws NumenaLibraryException{
+        createClientConnectionKeys();
+        Clienthello.ClientHello.Handshake handshake = buildClientHelloHandshake(serverHello);
+    }
+
+    public void createClientConnectionKeys()throws NumenaLibraryException{
+        byte[] tempclient_connection_pk = new byte[Sodium.crypto_box_publickeybytes()];
+        byte[] tempclient_connection_sk = new byte[Sodium.crypto_box_secretkeybytes()];
+        if (crypto_box_keypair(tempclient_connection_pk, tempclient_connection_sk) != 0) {
+            throw new NumenaLibraryException("Failing to create client connection keypair");
+        }
+        ValuesManager vm = ValuesManager.getInstance();
+        vm.setClientConnectionPublicKey(tempclient_connection_pk);
+        vm.setClientConnectionSecretKey(tempclient_connection_sk);
+    }
+
+    public Clienthello.ClientHello.Handshake buildClientHelloHandshake(ServerHello serverHello) throws NumenaLibraryException{
+        //Generate a ClientHello.Handshake message and populate the fields
+        ValuesManager vm = ValuesManager.getInstance();
+        Clienthello.ClientHello.Handshake.Builder clientHandshakeBuilder = Clienthello.ClientHello.Handshake.newBuilder();
+        //Message type
+        clientHandshakeBuilder.setMessageType(Constants.MESSAGETYPE_CLIENTHELLO_HANDSHAKE);
+        //client_connection_public_key
+        ByteString clientConnectionPk = ByteString.copyFrom(vm.getClientConnectionPublicKey());
+        clientHandshakeBuilder.setClientConnectionPublicKey(clientConnectionPk);
+        //Hashed server hello
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance(Constants.SHA256_ENCODING);
+        } catch (NoSuchAlgorithmException e) {
+            throw new NumenaLibraryException("Failing: Cannot get SHA-256 Encoding");
+        }
+        byte[] srvHello = serverHello.toByteArray();
+        md.update(srvHello);
+        ByteString hashedSrvBytes = ByteString.copyFrom(md.digest());
+        clientHandshakeBuilder.setHashedServerHello(hashedSrvBytes);
+        //Length of server hello
+        clientHandshakeBuilder.setLengthOfServerHello(srvHello.length);
+        Clienthello.ClientHello.Handshake clientHandshake = clientHandshakeBuilder.build();
+        return  clientHandshake;
+    }
+
+    public Clienthello.ClientHello.SignedHandshake buildSignedHandshake(Clienthello.ClientHello.Handshake clientHandshake, byte[] inputDstSignature){
+        Clienthello.ClientHello.SignedHandshake.Builder signedHandshakeBuilder = Clienthello.ClientHello.SignedHandshake.newBuilder();
+        signedHandshakeBuilder.setHandshake(clientHandshake);
+        ValuesManager valuesManager = ValuesManager.getInstance();
+        byte[] dstSignature = new byte[SodiumConstants.SIGNATURE_BYTES];
+        if(inputDstSignature != null){
+            dstSignature = inputDstSignature;
+            signedHandshakeBuilder.setIdentityPublicKey(ByteString.copyFrom(valuesManager.getClientIdentityPublicKey()));
+            signedHandshakeBuilder.setHandshakeSignature(ByteString.copyFrom(dstSignature));
+        }
+        // 8.2 Check if we're communicating with organization server
+        Clienthello.ClientHello.SignedHandshake signedHandshake = signedHandshakeBuilder.build();
+        return signedHandshake;
+    }
+
+
+
+    public Basemessage.BaseMessage packClientHello(byte[] ciphertext) throws NumenaLibraryException{
+        ValuesManager valuesManager = ValuesManager.getInstance();
+        Clienthello.ClientHello.Builder client_hello_builder = Clienthello.ClientHello.newBuilder();
+        client_hello_builder.setClientConnectionPublicKey(ByteString.copyFrom(valuesManager.getClientConnectionPublicKey()));
+        client_hello_builder.setEncryptedHandshake(ByteString.copyFrom(ciphertext));
+        Clienthello.ClientHello client_hello = client_hello_builder.build();
+        Basemessage.BaseMessage.Builder basemessage_builder = Basemessage.BaseMessage.newBuilder();
+        basemessage_builder.setType(Basemessage.BaseMessage.Type.CLIENTHELLO);
+        basemessage_builder.setClientHello(client_hello);
+        return basemessage_builder.build();
+    }
 }

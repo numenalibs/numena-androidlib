@@ -5,6 +5,8 @@ import android.util.Log;
 
 import java.util.concurrent.Callable;
 
+import messages.Basemessage;
+import messages.Clienthello;
 import messages.Serverhello.ServerHello;
 import messages.Serverhello.ServerHello.Handshake;
 import numenalibs.co.numenalib.encryption.EncryptionManager;
@@ -12,6 +14,7 @@ import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
 import numenalibs.co.numenalib.networking.SingleMessageManager;
 import numenalibs.co.numenalib.protocol.ProtocolManager;
+import numenalibs.co.numenalib.tools.ValuesManager;
 
 public class NumenaMessageHandler {
 
@@ -26,16 +29,32 @@ public class NumenaMessageHandler {
 
     }
 
-    public void handleServerHello(byte[] msg) throws NumenaLibraryException{
+    public ServerHello handleServerHello(byte[] msg) throws NumenaLibraryException{
         ServerHello serverHello = protocolManager.extractServerHello(msg);
         Handshake handshake = serverHello.getHandshake();
         encryptionManager.verifyServerhello(serverHello,handshake);
+        return serverHello;
     }
 
+    public Basemessage.BaseMessage buildClientHello(byte[] msg, ServerHello serverHello) throws NumenaLibraryException{
+        ValuesManager valuesManager = ValuesManager.getInstance();
+        protocolManager.createClientConnectionKeys();
+        Clienthello.ClientHello.Handshake handshake = protocolManager.buildClientHelloHandshake(serverHello);
+        byte[] dstSignature = null;
+        if(valuesManager.isConnectionToOrganizationServer()){
+            dstSignature = encryptionManager.makeHandshakeSignature(handshake,valuesManager.getClientConnectionPublicKey());
+        }
+        Clienthello.ClientHello.SignedHandshake signedHandshake = protocolManager.buildSignedHandshake(handshake,dstSignature);
+        byte[] cipherText = encryptionManager.encryptCipherText(signedHandshake);
+        Basemessage.BaseMessage baseMessage = protocolManager.packClientHello(cipherText);
+        return baseMessage;
+    }
+
+
     public void initConnection(){
-        ResultsListener listener = setupOpeningListener(new Callable<Void>() {
+        ResultsListener listener = setupOpeningListener(new Callable<byte[]>() {
             @Override
-            public Void call() throws Exception {
+            public byte[] call() throws Exception {
                 Log.d("HEY", "HEY");
                 return null;
             }
@@ -45,7 +64,7 @@ public class NumenaMessageHandler {
 
     }
 
-    private ResultsListener setupOpeningListener(final Callable<Void> inputFunc){
+    private ResultsListener setupOpeningListener(final Callable<byte[]> inputFunc){
         ResultsListener openingListener = new ResultsListener<byte[]>() {
             @Override
             public void onSuccess(byte[] result) {
