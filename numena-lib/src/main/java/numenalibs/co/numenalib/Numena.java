@@ -1,6 +1,8 @@
 package numenalibs.co.numenalib;
 
 
+import android.content.Context;
+
 import org.libsodium.jni.NaCl;
 import org.libsodium.jni.Sodium;
 
@@ -13,9 +15,12 @@ public class Numena {
         if(instance == null){
             instance = new Numena();
             instance.setMessageHandler(new NumenaMessageHandler());
-
         }
         return instance;
+    }
+
+    public void setupNumenaLibrary(Context context){
+        instance.getMessageHandler().setupNumenaDatabase(context);
     }
 
     public NumenaMessageHandler getMessageHandler() {

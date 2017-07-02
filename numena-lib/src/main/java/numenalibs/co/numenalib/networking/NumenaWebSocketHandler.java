@@ -43,9 +43,7 @@ public class NumenaWebSocketHandler implements WebSocket.ConnectionHandler {
 
     @Override
     public void onBinaryMessage(byte[] payload) {
-        Log.d("onBinaryMessage", Utils.printByteArray(payload));
         listener.onSuccess(payload);
-        Log.d("CONNECTION", "onBinaryMessage");
     }
 
 }

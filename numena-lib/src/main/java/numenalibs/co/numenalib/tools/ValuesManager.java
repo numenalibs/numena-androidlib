@@ -1,11 +1,13 @@
 package numenalibs.co.numenalib.tools;
 
 
+import android.content.Context;
 import android.util.Log;
 
 import java.util.Arrays;
 import java.util.HashMap;
 
+import numenalibs.co.numenalib.database.DatabaseHelper;
 import numenalibs.co.numenalib.interfaces.NumenaCommunicatorInterface;
 
 public class ValuesManager implements NumenaCommunicatorInterface {
@@ -24,8 +26,8 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     HashMap<String, byte[]> organisationKeys = new HashMap<>();
     HashMap<String, byte[]> appKeys = new HashMap<>();
 
-
     private static ValuesManager instance;
+    private DatabaseHelper databaseHelper;
 
     public static ValuesManager getInstance(){
         if(instance == null){
@@ -34,6 +36,10 @@ public class ValuesManager implements NumenaCommunicatorInterface {
             instance.setRemoteNonce(1);
         }
         return instance;
+    }
+
+    public void initDatabase(Context context){
+        databaseHelper = new DatabaseHelper(context, "");
     }
 
     public void printValues(){

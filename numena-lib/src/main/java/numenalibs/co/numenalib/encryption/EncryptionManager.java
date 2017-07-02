@@ -28,7 +28,6 @@ import static org.libsodium.jni.Sodium.crypto_sign_detached;
 
 public class EncryptionManager {
 
-    public static final int crypto_box_MACBYTES = 16;
 
     public void verifyServerhello(ServerHello srvHello, Handshake handshake) throws NumenaLibraryException {
         ValuesManager vm = ValuesManager.getInstance();
@@ -103,12 +102,10 @@ public class EncryptionManager {
     }
 
     public byte[] encryptMessage(byte[] MESSAGE, int MESSAGE_LEN, int nonceCounter) throws NumenaLibraryException {
-        int CIPHERTEXT_LEN = crypto_box_MACBYTES + MESSAGE_LEN;
+        int CIPHERTEXT_LEN = Constants.CRYPTO_BOX_MACBYTES + MESSAGE_LEN;
         ValuesManager valuesManager = ValuesManager.getInstance();
         byte[] ciphertext = new byte[CIPHERTEXT_LEN];
         byte[] nonce;
-        Log.d("Local NOUNCE", valuesManager.getLocalNonce()+ "");
-        Log.d("REMOTE NOUNCE", valuesManager.getRemoteNonce() + "");
         nonce = Utils.createNonceArray(nonceCounter);
 
         if (crypto_box_easy(
@@ -125,12 +122,8 @@ public class EncryptionManager {
 
     public byte[] decrypt_message(byte[] CIPHERTEXT) {
         ValuesManager valuesManager = ValuesManager.getInstance();
-        byte[] decrypted = new byte[CIPHERTEXT.length - crypto_box_MACBYTES];
+        byte[] decrypted = new byte[CIPHERTEXT.length - Constants.CRYPTO_BOX_MACBYTES];
         byte[] nonce;
-        Log.d("Local NOUNCE", valuesManager.getLocalNonce()+ "");
-        Log.d("REMOTE NOUNCE", valuesManager.getRemoteNonce() + "");
-        Log.d("SERVERKEYS", Utils.printByteArray(valuesManager.getServerConnectionPublicKey()));
-        Log.d("CLIENTKEYS", Utils.printByteArray(valuesManager.getClientConnectionSecretKey()));
         nonce = Utils.createNonceArray(valuesManager.getRemoteNonce());
         crypto_box_open_easy(
                 decrypted,
