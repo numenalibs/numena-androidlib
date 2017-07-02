@@ -13,7 +13,7 @@ public class Numena {
         if(instance == null){
             instance = new Numena();
             instance.setMessageHandler(new NumenaMessageHandler());
-            Sodium sodium = NaCl.sodium();
+
         }
         return instance;
     }

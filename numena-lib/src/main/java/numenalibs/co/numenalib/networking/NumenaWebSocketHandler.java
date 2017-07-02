@@ -6,6 +6,7 @@ import android.util.Log;
 import de.tavendo.autobahn.WebSocket;
 import de.tavendo.autobahn.WebSocketConnectionHandler;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
+import numenalibs.co.numenalib.tools.Utils;
 
 public class NumenaWebSocketHandler implements WebSocket.ConnectionHandler {
 
@@ -42,6 +43,7 @@ public class NumenaWebSocketHandler implements WebSocket.ConnectionHandler {
 
     @Override
     public void onBinaryMessage(byte[] payload) {
+        Log.d("onBinaryMessage", Utils.printByteArray(payload));
         listener.onSuccess(payload);
         Log.d("CONNECTION", "onBinaryMessage");
     }

@@ -1,6 +1,8 @@
 package numenalibs.co.numenalib.tools;
 
 
+import android.util.Log;
+
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -32,6 +34,17 @@ public class ValuesManager implements NumenaCommunicatorInterface {
             instance.setRemoteNonce(1);
         }
         return instance;
+    }
+
+    public void printValues(){
+        Log.d("VALUES", "serverConnectionPublicKey " +  Utils.printByteArray(serverConnectionPublicKey));
+        Log.d("VALUES", "serverIdentityPublicKey " +   Utils.printByteArray(serverIdentityPublicKey));
+        Log.d("VALUES", "clientConnectionPublicKey " +  Utils.printByteArray(clientConnectionPublicKey));
+        Log.d("VALUES", "clientConnectionSecretKey " +   Utils.printByteArray(clientConnectionSecretKey));
+        Log.d("VALUES", "clientIdentityPublicKey " +   Utils.printByteArray(clientIdentityPublicKey));
+        Log.d("VALUES", "clientIdentitySecretKey " +  Utils.printByteArray(clientIdentitySecretKey));
+        Log.d("VALUES", "localNonce " + localNonce);
+        Log.d("VALUES ", "remoteNonce" + remoteNonce);
     }
 
     public String getConnectionUrl() {

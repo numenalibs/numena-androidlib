@@ -77,11 +77,6 @@ public class ProtocolManager {
         }
     }
 
-    public void buildClientHello(byte[] msg, ServerHello serverHello) throws NumenaLibraryException{
-        createClientConnectionKeys();
-        Clienthello.ClientHello.Handshake handshake = buildClientHelloHandshake(serverHello);
-    }
-
     public void createClientConnectionKeys()throws NumenaLibraryException{
         byte[] tempclient_connection_pk = new byte[Sodium.crypto_box_publickeybytes()];
         byte[] tempclient_connection_sk = new byte[Sodium.crypto_box_secretkeybytes()];

@@ -1,6 +1,9 @@
 package numenalibs.co.numenalib.tools;
 
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
 public class Utils {
 
     public static byte[] hexStringToByteArray(String s) {
@@ -12,4 +15,24 @@ public class Utils {
         }
         return data;
     }
+
+    public static byte[] createNonceArray(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(24);
+        buffer.putLong(x);
+        return buffer.array();
+    }
+
+    public static String printByteArray(byte[] input) {
+        if(input != null) {
+            String[] output = new String[input.length];
+            for (int i = 0; i < input.length; i++) {
+                int positive = input[i] & 0xff;
+                String hex = String.format("%02x", positive);
+                output[i] = hex;
+            }
+            return Arrays.toString(output);
+        }
+        return " EMPTY INPUT ";
+    }
+
 }

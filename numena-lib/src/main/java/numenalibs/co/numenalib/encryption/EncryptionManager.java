@@ -1,6 +1,8 @@
 package numenalibs.co.numenalib.encryption;
 
 
+import android.util.Log;
+
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -17,12 +19,16 @@ import messages.Serverhello.ServerHello;
 import messages.Serverhello.ServerHello.Handshake;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.tools.Constants;
+import numenalibs.co.numenalib.tools.Utils;
 import numenalibs.co.numenalib.tools.ValuesManager;
 
 import static org.libsodium.jni.Sodium.crypto_box_easy;
+import static org.libsodium.jni.Sodium.crypto_box_open_easy;
 import static org.libsodium.jni.Sodium.crypto_sign_detached;
 
 public class EncryptionManager {
+
+    public static final int crypto_box_MACBYTES = 16;
 
     public void verifyServerhello(ServerHello srvHello, Handshake handshake) throws NumenaLibraryException {
         ValuesManager vm = ValuesManager.getInstance();
@@ -95,4 +101,48 @@ public class EncryptionManager {
 
         return ciphertext;
     }
+
+    public byte[] encryptMessage(byte[] MESSAGE, int MESSAGE_LEN, int nonceCounter) throws NumenaLibraryException {
+        int CIPHERTEXT_LEN = crypto_box_MACBYTES + MESSAGE_LEN;
+        ValuesManager valuesManager = ValuesManager.getInstance();
+        byte[] ciphertext = new byte[CIPHERTEXT_LEN];
+        byte[] nonce;
+        Log.d("Local NOUNCE", valuesManager.getLocalNonce()+ "");
+        Log.d("REMOTE NOUNCE", valuesManager.getRemoteNonce() + "");
+        nonce = Utils.createNonceArray(nonceCounter);
+
+        if (crypto_box_easy(
+                ciphertext,
+                MESSAGE,
+                MESSAGE_LEN,
+                nonce,
+                valuesManager.getServerConnectionPublicKey(),
+                valuesManager.getClientConnectionSecretKey()) != 0) {
+            throw new NumenaLibraryException("ENCRYPTION FAIL");
+        }
+        return ciphertext;
+    }
+
+    public byte[] decrypt_message(byte[] CIPHERTEXT) {
+        ValuesManager valuesManager = ValuesManager.getInstance();
+        byte[] decrypted = new byte[CIPHERTEXT.length - crypto_box_MACBYTES];
+        byte[] nonce;
+        Log.d("Local NOUNCE", valuesManager.getLocalNonce()+ "");
+        Log.d("REMOTE NOUNCE", valuesManager.getRemoteNonce() + "");
+        Log.d("SERVERKEYS", Utils.printByteArray(valuesManager.getServerConnectionPublicKey()));
+        Log.d("CLIENTKEYS", Utils.printByteArray(valuesManager.getClientConnectionSecretKey()));
+        nonce = Utils.createNonceArray(valuesManager.getRemoteNonce());
+        crypto_box_open_easy(
+                decrypted,
+                CIPHERTEXT,
+                CIPHERTEXT.length,
+                nonce,
+                valuesManager.getServerConnectionPublicKey(),
+                valuesManager.getClientConnectionSecretKey()
+        );
+
+        return decrypted;
+    }
+
+
 }

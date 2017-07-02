@@ -35,12 +35,18 @@ public class SingleMessageManager {
         }
     }
 
+    public void sendBinary(byte[] msg){
+        webSocketConnection.sendBinaryMessage(msg);
+    }
+
     public ResultsListener<byte[]> getListener() {
         return listener;
     }
 
     public void setListener(ResultsListener<byte[]> listener) {
         this.listener = listener;
+        if(numenaWebSocketHandler != null)
+        numenaWebSocketHandler.setListener(listener);
     }
 
 }
