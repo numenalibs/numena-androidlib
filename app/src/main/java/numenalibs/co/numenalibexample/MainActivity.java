@@ -14,7 +14,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Numena numena = Numena.getInstance();
         numena.setupNumenaLibrary(this);
-        numena.getMessageHandler().initConnection();
 
     }
 }

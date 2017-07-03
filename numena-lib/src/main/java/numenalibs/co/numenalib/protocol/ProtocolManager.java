@@ -1,12 +1,18 @@
 package numenalibs.co.numenalib.protocol;
 
 
+import android.util.Log;
+
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.libsodium.jni.Sodium;
 import org.libsodium.jni.SodiumConstants;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -16,6 +22,7 @@ import java.util.TimeZone;
 import messages.Basemessage;
 import messages.Basemessage.BaseMessage;
 import messages.Clienthello;
+import messages.Ledgerinterface;
 import messages.Serverhello.ServerHello;
 import messages.Serverhello.ServerHello.Handshake;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
@@ -142,4 +149,98 @@ public class ProtocolManager {
         basemessage_builder.setClientHello(client_hello);
         return basemessage_builder.build();
     }
+
+    public Basemessage.BaseMessage getUsers(String query, byte[] organizationId) {
+        byte[] emptyKey = new byte[0];
+        // User
+        Ledgerinterface.LedgerInterface.User.Builder userbuilder = Ledgerinterface.LedgerInterface.User.newBuilder();
+        userbuilder.setUsername(ByteString.copyFrom(query.getBytes()));
+        userbuilder.setOrganization(ByteString.copyFrom(organizationId));
+        userbuilder.setKey(ByteString.copyFrom(emptyKey));
+        Ledgerinterface.LedgerInterface.User user = userbuilder.build();
+
+        // Ledgerinterface
+        Ledgerinterface.LedgerInterface.Builder ledger_builder = Ledgerinterface.LedgerInterface.newBuilder();
+        ledger_builder.setType(Ledgerinterface.LedgerInterface.Type.GETUSER);
+        ledger_builder.setGetUser(user);
+        Ledgerinterface.LedgerInterface ledger = ledger_builder.build();
+
+        // BaseMessage
+        Basemessage.BaseMessage.Builder basemsg_builder = Basemessage.BaseMessage.newBuilder();
+        basemsg_builder.setType(Basemessage.BaseMessage.Type.LEDGER);
+        basemsg_builder.setLedger(ledger);
+        Basemessage.BaseMessage basemsg = basemsg_builder.build();
+
+        return basemsg;
+    }
+
+    public Basemessage.BaseMessage register(Ledgerinterface.LedgerInterface.UserEvent reg_user) {
+        // Ledgerinterface
+        Ledgerinterface.LedgerInterface.Builder ledger_builder = Ledgerinterface.LedgerInterface.newBuilder();
+        ledger_builder.setType(Ledgerinterface.LedgerInterface.Type.REGISTER);
+        ledger_builder.setRegisterUser(reg_user);
+        Ledgerinterface.LedgerInterface ledger = ledger_builder.build();
+
+        // BaseMessage
+        Basemessage.BaseMessage.Builder basemsg_builder = Basemessage.BaseMessage.newBuilder();
+        basemsg_builder.setType(Basemessage.BaseMessage.Type.LEDGER);
+        basemsg_builder.setLedger(ledger);
+        Basemessage.BaseMessage basemsg = basemsg_builder.build();
+
+        return basemsg;
+    }
+
+    public Basemessage.BaseMessage unregister(Ledgerinterface.LedgerInterface.UserEvent unreg_user) {
+        // LedgerInterface
+        Ledgerinterface.LedgerInterface.Builder ledger_builder = Ledgerinterface.LedgerInterface.newBuilder();
+        ledger_builder.setType(Ledgerinterface.LedgerInterface.Type.UNREGISTER);
+        ledger_builder.setUnregisterUser(unreg_user);
+        Ledgerinterface.LedgerInterface ledger = ledger_builder.build();
+
+        // BaseMessage
+        Basemessage.BaseMessage.Builder basemsg_builder = Basemessage.BaseMessage.newBuilder();
+        basemsg_builder.setType(Basemessage.BaseMessage.Type.LEDGER);
+        basemsg_builder.setLedger(ledger);
+        Basemessage.BaseMessage basemsg = basemsg_builder.build();
+
+        return basemsg;
+    }
+
+    public Ledgerinterface.LedgerInterface.User userProto(String title, byte[] publicKey, byte[] organizationId, byte[] appPbKey) {
+        ByteString my_username = ByteString.copyFrom(title.getBytes());
+        Ledgerinterface.LedgerInterface.User.Builder user_builder = Ledgerinterface.LedgerInterface.User.newBuilder();
+        user_builder.setUsername(my_username);
+        user_builder.setKey(ByteString.copyFrom(publicKey));
+        user_builder.setOrganization(ByteString.copyFrom(organizationId));
+        user_builder.setAppData(ByteString.copyFrom(appPbKey));
+        Ledgerinterface.LedgerInterface.User userProto = user_builder.build();
+        return userProto;
+    }
+
+    /**
+     * This method returns a build containing a user ledgerinterface.
+     * Usually used to gain a build to sign a message with.
+     * @param user
+     * @return
+     */
+
+    public Ledgerinterface.LedgerInterface.UserEvent.Builder userEventProtoBuilder(Ledgerinterface.LedgerInterface.User user) {
+        // UserEvent
+        Ledgerinterface.LedgerInterface.UserEvent.Builder remove_UserEvent_builder = Ledgerinterface.LedgerInterface.UserEvent.newBuilder();
+        remove_UserEvent_builder.setUser(user);
+        return remove_UserEvent_builder;
+    }
+
+    /**
+     * Sets a signature on a builder and returns a userevent.
+     * @param builder
+     * @param signature
+     * @return
+     */
+
+    public Ledgerinterface.LedgerInterface.UserEvent setSignatureOnUserEvent(Ledgerinterface.LedgerInterface.UserEvent.Builder builder, byte[] signature) {
+        builder.setSignedMsg(ByteString.copyFrom(signature));
+        return builder.build();
+    }
+
 }

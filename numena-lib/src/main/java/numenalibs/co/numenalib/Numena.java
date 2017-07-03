@@ -20,7 +20,7 @@ public class Numena {
     }
 
     public void setupNumenaLibrary(Context context){
-        instance.getMessageHandler().setupNumenaDatabase(context);
+        instance.getMessageHandler().startNumenaCommunication(context);
     }
 
     public NumenaMessageHandler getMessageHandler() {

@@ -24,7 +24,7 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     private String connectionUrl = "ws://dev.numena.co:8000";
     HashMap<String, byte[]> organisationKeys = new HashMap<>();
     HashMap<String, byte[]> keys = new HashMap<>();
-
+    private byte[] organisationId = "Numena".getBytes();
     private static ValuesManager instance;
     private DatabaseHelper databaseHelper;
 
@@ -119,6 +119,14 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     @Override
     public void disconnectFromAidl() {
 
+    }
+
+    public byte[] getOrganisationId() {
+        return organisationId;
+    }
+
+    public void setOrganisationId(byte[] organisationId) {
+        this.organisationId = Arrays.copyOf(organisationId,organisationId.length);
     }
 
     public boolean isConnectionToOrganizationServer() {

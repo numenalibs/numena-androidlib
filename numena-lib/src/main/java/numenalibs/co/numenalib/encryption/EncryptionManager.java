@@ -33,11 +33,44 @@ public class EncryptionManager {
         Sodium sodium = NaCl.sodium();
     }
 
+    public void setupKeys() {
+        ValuesManager vm = ValuesManager.getInstance();
+        if (!hasIdentityKeys()) {
+            long publickeylen = Sodium.crypto_sign_publickeybytes();
+            long privatekeylen = Sodium.crypto_sign_secretkeybytes();
+            byte[] DEVICE_IDENTITY_PK = new byte[(int) publickeylen];
+            byte[] DEVICE_IDENTITY_SK = new byte[(int) privatekeylen];
+            Sodium.randombytes(DEVICE_IDENTITY_PK, (int) publickeylen);
+            Sodium.randombytes(DEVICE_IDENTITY_SK, (int) privatekeylen);
+            Sodium.crypto_sign_keypair(DEVICE_IDENTITY_PK, DEVICE_IDENTITY_SK);
+            vm.setClientIdentityPublicKey(DEVICE_IDENTITY_PK);
+            vm.setClientIdentitySecretKey(DEVICE_IDENTITY_SK);
+        }else {
+            vm.refreshKeysFromDatabase();
+        }
+    }
+
+    public boolean hasIdentityKeys(){
+        return ValuesManager.getInstance().identityExists();
+    }
+
+    public byte[] signMessage(byte[] originalmessage, byte[] secretkey) throws NumenaLibraryException {
+        byte[] signature = new byte[Sodium.crypto_sign_bytes()];
+        int[] signaturelen = new int[1];
+        if (Sodium.crypto_sign_detached(
+                signature,
+                signaturelen,
+                originalmessage,
+                originalmessage.length,
+                secretkey) != 0) {
+            throw new NumenaLibraryException("Failed: Could not sign message");
+        }
+        return signature;
+    }
 
     public void verifyServerhello(ServerHello srvHello, Handshake handshake) throws NumenaLibraryException {
         ValuesManager vm = ValuesManager.getInstance();
         ByteString srvOrganizationSignature = srvHello.getServerOrganizationSignature();
-        Log.d("ASDKASODK", Utils.printByteArray(vm.getServerIdentityPublicKey()));
         byte[] publicKey = vm.getServerIdentityPublicKey();
         if (Sodium.crypto_sign_verify_detached(
                 srvOrganizationSignature.toByteArray(),
