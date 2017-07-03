@@ -6,6 +6,7 @@ import android.util.Log;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import org.libsodium.jni.NaCl;
 import org.libsodium.jni.Sodium;
 import org.libsodium.jni.SodiumConstants;
 
@@ -28,14 +29,20 @@ import static org.libsodium.jni.Sodium.crypto_sign_detached;
 
 public class EncryptionManager {
 
+    public EncryptionManager(){
+        Sodium sodium = NaCl.sodium();
+    }
+
 
     public void verifyServerhello(ServerHello srvHello, Handshake handshake) throws NumenaLibraryException {
         ValuesManager vm = ValuesManager.getInstance();
         ByteString srvOrganizationSignature = srvHello.getServerOrganizationSignature();
+        Log.d("ASDKASODK", Utils.printByteArray(vm.getServerIdentityPublicKey()));
+        byte[] publicKey = vm.getServerIdentityPublicKey();
         if (Sodium.crypto_sign_verify_detached(
                 srvOrganizationSignature.toByteArray(),
-                vm.getServerIdentityPublicKey(),
-                vm.getServerIdentityPublicKey().length,
+                publicKey,
+                publicKey.length,
                 srvHello.getServerOrganizationPublicKey().toByteArray()
         ) != 0) {
             throw new NumenaLibraryException("Failing: Signature on handshake server identity key is not correct");

@@ -4,7 +4,6 @@ package numenalibs.co.numenalib;
 import android.content.Context;
 import android.util.Log;
 
-import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.libsodium.jni.NaCl;
@@ -24,7 +23,6 @@ import numenalibs.co.numenalib.protocol.ProtocolManager;
 import numenalibs.co.numenalib.tools.ValuesManager;
 
 
-
 public class NumenaMessageHandler {
 
     private ProtocolManager protocolManager;
@@ -35,12 +33,12 @@ public class NumenaMessageHandler {
         protocolManager = new ProtocolManager();
         encryptionManager = new EncryptionManager();
         singleMessageManager = new SingleMessageManager();
-        setupKeys();
     }
 
-    public void setupNumenaDatabase(Context context){
+    public void setupNumenaDatabase(Context context) {
         ValuesManager valuesManager = ValuesManager.getInstance();
         valuesManager.initDatabase(context);
+        setupKeys();
     }
 
     public Serverhello.ServerHello handleServerHello(byte[] msg) throws NumenaLibraryException {
@@ -65,17 +63,24 @@ public class NumenaMessageHandler {
     }
 
     private void setupKeys() {
-        Sodium sodium = NaCl.sodium();
         ValuesManager vm = ValuesManager.getInstance();
-        long publickeylen = Sodium.crypto_sign_publickeybytes();
-        long privatekeylen = Sodium.crypto_sign_secretkeybytes();
-        byte[] DEVICE_IDENTITY_PK = new byte[(int) publickeylen];
-        byte[] DEVICE_IDENTITY_SK = new byte[(int) privatekeylen];
-        Sodium.randombytes(DEVICE_IDENTITY_PK, (int) publickeylen);
-        Sodium.randombytes(DEVICE_IDENTITY_SK, (int) privatekeylen);
-        Sodium.crypto_sign_keypair(DEVICE_IDENTITY_PK, DEVICE_IDENTITY_SK);
-        vm.setClientIdentityPublicKey(DEVICE_IDENTITY_PK);
-        vm.setClientIdentitySecretKey(DEVICE_IDENTITY_SK);
+        if (!hasIdentityKeys()) {
+            long publickeylen = Sodium.crypto_sign_publickeybytes();
+            long privatekeylen = Sodium.crypto_sign_secretkeybytes();
+            byte[] DEVICE_IDENTITY_PK = new byte[(int) publickeylen];
+            byte[] DEVICE_IDENTITY_SK = new byte[(int) privatekeylen];
+            Sodium.randombytes(DEVICE_IDENTITY_PK, (int) publickeylen);
+            Sodium.randombytes(DEVICE_IDENTITY_SK, (int) privatekeylen);
+            Sodium.crypto_sign_keypair(DEVICE_IDENTITY_PK, DEVICE_IDENTITY_SK);
+            vm.setClientIdentityPublicKey(DEVICE_IDENTITY_PK);
+            vm.setClientIdentitySecretKey(DEVICE_IDENTITY_SK);
+        }else {
+            vm.refreshKeysFromDatabase();
+        }
+    }
+
+    public boolean hasIdentityKeys(){
+        return ValuesManager.getInstance().identityExists();
     }
 
 
@@ -115,6 +120,9 @@ public class NumenaMessageHandler {
                 Statusmessage.StatusMessage status = basemessage.getStatus();
                 long code = status.getStatusCode();
                 Log.d("code", "value: " + code);
+                ValuesManager valuesManager = ValuesManager.getInstance();
+                valuesManager.storeKeysInDatabase();
+                valuesManager.refreshKeysFromDatabase();
             }
         } catch (InvalidProtocolBufferException e) {
             e.printStackTrace();

@@ -4,27 +4,26 @@ package numenalibs.co.numenalib.tools;
 import android.content.Context;
 import android.util.Log;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import numenalibs.co.numenalib.database.DatabaseHelper;
+import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.interfaces.NumenaCommunicatorInterface;
+import numenalibs.co.numenalib.models.Key;
 
 public class ValuesManager implements NumenaCommunicatorInterface {
 
-    private byte[] serverConnectionPublicKey;
-    private byte[] serverIdentityPublicKey;
     private byte[] whitelist = Utils.hexStringToByteArray("6c7771fdc6d83b641ad4e994a9c9bdb6e786d1b5e6953eaf1fa63b0223c156e4");;
-    private byte[] clientConnectionPublicKey;
-    private byte[] clientConnectionSecretKey;
-    private byte[] clientIdentityPublicKey;
-    private byte[] clientIdentitySecretKey;
     private int localNonce;
     private int remoteNonce;
     private boolean isConnectionToOrganizationServer = false;
     private String connectionUrl = "ws://dev.numena.co:8000";
     HashMap<String, byte[]> organisationKeys = new HashMap<>();
-    HashMap<String, byte[]> appKeys = new HashMap<>();
+    HashMap<String, byte[]> keys = new HashMap<>();
 
     private static ValuesManager instance;
     private DatabaseHelper databaseHelper;
@@ -42,13 +41,49 @@ public class ValuesManager implements NumenaCommunicatorInterface {
         databaseHelper = new DatabaseHelper(context, "");
     }
 
+    public void refreshKeysFromDatabase(){
+        List<Key> keys = databaseHelper.getAllKeys();
+        for(Key key : keys){
+            Log.d("Keys", "KEYNAME " + key.getKeyName() + " KEYVALUE " + Utils.printByteArray(key.getKeyValue()));
+            this.keys.put(key.getKeyName(),key.getKeyValue());
+        }
+    }
+
+    public boolean identityExists(){
+        return databaseHelper.identityKeysExists();
+    }
+
+    public void storeKeysInDatabase(){
+        for(String key : keys.keySet()){
+            byte[] value = keys.get(key);
+            String keyHash = null;
+            try {
+                keyHash = getHash(value);
+            } catch (NumenaLibraryException e) {
+                e.printStackTrace();
+            }
+            databaseHelper.insertValuesIntoKeys(key, value,keyHash);
+        }
+    }
+
+    public String getHash(byte[] key) throws NumenaLibraryException {
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance(Constants.SHA256_ENCODING);
+            md.update(key);
+            return Utils.printByteArray(md.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new NumenaLibraryException("Failing: Cannot get SHA-256 Encoding");
+        }
+    }
+
     public void printValues(){
-        Log.d("VALUES", "serverConnectionPublicKey " +  Utils.printByteArray(serverConnectionPublicKey));
-        Log.d("VALUES", "serverIdentityPublicKey " +   Utils.printByteArray(serverIdentityPublicKey));
-        Log.d("VALUES", "clientConnectionPublicKey " +  Utils.printByteArray(clientConnectionPublicKey));
-        Log.d("VALUES", "clientConnectionSecretKey " +   Utils.printByteArray(clientConnectionSecretKey));
-        Log.d("VALUES", "clientIdentityPublicKey " +   Utils.printByteArray(clientIdentityPublicKey));
-        Log.d("VALUES", "clientIdentitySecretKey " +  Utils.printByteArray(clientIdentitySecretKey));
+        Log.d("VALUES", "serverConnectionPublicKey " +  Utils.printByteArray(keys.get(Constants.SERVER_CONNECTION_PUBLICKEY)));
+        Log.d("VALUES", "serverIdentityPublicKey " +   Utils.printByteArray(keys.get(Constants.SERVER_IDENTITY_PUBLICKEY)));
+        Log.d("VALUES", "clientConnectionPublicKey " +  Utils.printByteArray(keys.get(Constants.CLIENT_CONNECTION_PUBLICKEY)));
+        Log.d("VALUES", "clientConnectionSecretKey " +   Utils.printByteArray(keys.get(Constants.CLIENT_CONNECTION_SECRETKEY)));
+        Log.d("VALUES", "clientIdentityPublicKey " +   Utils.printByteArray(keys.get(Constants.CLIENT_IDENTITY_PUBLICKEY)));
+        Log.d("VALUES", "clientIdentitySecretKey " +  Utils.printByteArray(keys.get(Constants.CLIENT_CONNECTION_SECRETKEY)));
         Log.d("VALUES", "localNonce " + localNonce);
         Log.d("VALUES ", "remoteNonce" + remoteNonce);
     }
@@ -95,19 +130,19 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     }
 
     public byte[] getClientIdentityPublicKey() {
-        return clientIdentityPublicKey;
+        return keys.get(Constants.CLIENT_IDENTITY_PUBLICKEY);
     }
 
     public void setClientIdentityPublicKey(byte[] clientIdentityPublicKey) {
-        this.clientIdentityPublicKey = Arrays.copyOf(clientIdentityPublicKey, clientIdentityPublicKey.length);
+        keys.put(Constants.CLIENT_IDENTITY_PUBLICKEY, clientIdentityPublicKey);
     }
 
     public byte[] getClientIdentitySecretKey() {
-        return clientIdentitySecretKey;
+        return keys.get(Constants.CLIENT_IDENTITY_SECRETKEY);
     }
 
     public void setClientIdentitySecretKey(byte[] clientIdentitySecretKey) {
-        this.clientIdentitySecretKey =  Arrays.copyOf(clientIdentitySecretKey, clientIdentitySecretKey.length);
+        keys.put(Constants.CLIENT_IDENTITY_SECRETKEY, clientIdentitySecretKey);
     }
 
     public int getLocalNonce() {
@@ -127,19 +162,19 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     }
 
     public byte[] getServerConnectionPublicKey() {
-        return serverConnectionPublicKey;
+        return keys.get(Constants.SERVER_CONNECTION_PUBLICKEY);
     }
 
     public void setServerConnectionPublicKey(byte[] serverConnectionPublicKey) {
-        this.serverConnectionPublicKey = Arrays.copyOf(serverConnectionPublicKey, serverConnectionPublicKey.length);
+        keys.put(Constants.SERVER_CONNECTION_PUBLICKEY, serverConnectionPublicKey);
     }
 
     public byte[] getServerIdentityPublicKey() {
-        return serverIdentityPublicKey;
+        return keys.get(Constants.SERVER_IDENTITY_PUBLICKEY);
     }
 
     public void setServerIdentityPublicKey(byte[] serverIdentityPublicKey) {
-        this.serverIdentityPublicKey = Arrays.copyOf(serverIdentityPublicKey,serverIdentityPublicKey.length);
+        keys.put(Constants.SERVER_IDENTITY_PUBLICKEY, serverIdentityPublicKey);
     }
 
     public byte[] getWhitelist() {
@@ -151,19 +186,19 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     }
 
     public byte[] getClientConnectionPublicKey() {
-        return clientConnectionPublicKey;
+        return keys.get(Constants.CLIENT_CONNECTION_PUBLICKEY);
     }
 
     public void setClientConnectionPublicKey(byte[] clientConnectionPublicKey) {
-        this.clientConnectionPublicKey = Arrays.copyOf(clientConnectionPublicKey,clientConnectionPublicKey.length);
+        keys.put(Constants.CLIENT_CONNECTION_PUBLICKEY, clientConnectionPublicKey);
     }
 
     public byte[] getClientConnectionSecretKey() {
-        return clientConnectionSecretKey;
+        return keys.get(Constants.CLIENT_CONNECTION_SECRETKEY);
     }
 
     public void setClientConnectionSecretKey(byte[] clientConnectionSecretKey) {
-        this.clientConnectionSecretKey = Arrays.copyOf(clientConnectionSecretKey,clientConnectionSecretKey.length);
+        keys.put(Constants.CLIENT_CONNECTION_SECRETKEY, clientConnectionSecretKey);
     }
 
     public HashMap<String, byte[]> getOrganisationKeys() {
