@@ -6,6 +6,8 @@ import android.content.Context;
 import org.libsodium.jni.NaCl;
 import org.libsodium.jni.Sodium;
 
+import numenalibs.co.numenalib.interfaces.ResultsListener;
+
 public class Numena {
 
     private static Numena instance;

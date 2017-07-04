@@ -38,13 +38,56 @@ public class NumenaMessageHandler {
         ValuesManager valuesManager = ValuesManager.getInstance();
         valuesManager.initDatabase(context);
         encryptionManager.setupKeys();
-        numenaMessageHelper.initConnection();
+       // numenaMessageHelper.initConnection(listener);
     }
 
-    public void getUsers(String query){
-        numenaMessageHelper.buildAndSendGetUsers(query);
+    public void getUsers(final String query,final ResultsListener<byte[]> listener) {
+        if (numenaMessageHelper.isConnectionEstablished()) {
+            executeGetUsersCall(query, listener);
+        } else {
+            numenaMessageHelper.initConnection(new ResultsListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] result) {
+                    executeGetUsersCall(query, listener);
+                }
+
+                @Override
+                public void onFailure(Throwable e, String response) {
+                    listener.onFailure(new NumenaLibraryException("Failure: Could not register"), e.getMessage());
+                }
+            });
+        }
     }
 
+    public void register(final String title,final byte[] organisationId,final byte[] appData,final ResultsListener<byte[]> listener) {
+        if (numenaMessageHelper.isConnectionEstablished()) {
+            executeRegisterCall(title, organisationId, appData, listener);
+        } else {
+            numenaMessageHelper.initConnection(new ResultsListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] result) {
+                    executeRegisterCall(title, organisationId, appData, listener);
+                }
+
+                @Override
+                public void onFailure(Throwable e, String response) {
+                    listener.onFailure(new NumenaLibraryException("Failure: Could not register"), e.getMessage());
+                }
+            });
+        }
+
+    }
+
+    private void executeGetUsersCall(String query, ResultsListener<byte[]> listener){
+        numenaMessageHelper.buildAndSendGetUsers(query, listener);
+
+    }
+
+    private void executeRegisterCall(String title, byte[] organisationId, byte[] appData, ResultsListener<byte[]> listener) {
+        ValuesManager valuesManager = ValuesManager.getInstance();
+        byte[] publicKey = valuesManager.getClientIdentityPublicKey();
+        numenaMessageHelper.buildAndSendRegister(title, publicKey, organisationId, appData, listener);
+    }
 
 
 }
