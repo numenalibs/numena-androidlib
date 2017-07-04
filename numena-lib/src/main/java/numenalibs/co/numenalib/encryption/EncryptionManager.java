@@ -6,6 +6,7 @@ import android.util.Log;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
+
 import org.libsodium.jni.NaCl;
 import org.libsodium.jni.Sodium;
 import org.libsodium.jni.SodiumConstants;
@@ -26,6 +27,7 @@ import numenalibs.co.numenalib.tools.ValuesManager;
 import static org.libsodium.jni.Sodium.crypto_box_easy;
 import static org.libsodium.jni.Sodium.crypto_box_open_easy;
 import static org.libsodium.jni.Sodium.crypto_sign_detached;
+
 
 public class EncryptionManager {
 
@@ -57,7 +59,7 @@ public class EncryptionManager {
     public byte[] signMessage(byte[] originalmessage, byte[] secretkey) throws NumenaLibraryException {
         byte[] signature = new byte[Sodium.crypto_sign_bytes()];
         int[] signaturelen = new int[1];
-        if (Sodium.crypto_sign_detached(
+        if (crypto_sign_detached(
                 signature,
                 signaturelen,
                 originalmessage,
