@@ -14,6 +14,8 @@ public class Constants {
     public static final int CRYPTO_BOX_MACBYTES = 16;
     public static final int EXPECTING_SERVERHELLO = 1;
     public static final int EXPECTING_MESSAGE = 2;
+    public static final String RESPONSE_SUCCESS = "SUCCESIVE_CALL";
+    public static final String RESPONSE_FAILURE = "FAILED_CALL";
 
     /**
      * KEYNAMES

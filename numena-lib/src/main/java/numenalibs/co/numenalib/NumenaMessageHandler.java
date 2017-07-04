@@ -15,6 +15,7 @@ import numenalibs.co.numenalib.encryption.EncryptionManager;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
 import numenalibs.co.numenalib.models.NumenaMethod;
+import numenalibs.co.numenalib.models.NumenaResponse;
 import numenalibs.co.numenalib.networking.SingleMessageManager;
 import numenalibs.co.numenalib.protocol.ProtocolManager;
 import numenalibs.co.numenalib.tools.ValuesManager;
@@ -41,13 +42,13 @@ public class NumenaMessageHandler {
        // numenaMessageHelper.initConnection(listener);
     }
 
-    public void getUsers(final String query,final ResultsListener<byte[]> listener) {
+    public void getUsers(final String query,final ResultsListener<NumenaResponse> listener) {
         if (numenaMessageHelper.isConnectionEstablished()) {
             executeGetUsersCall(query, listener);
         } else {
-            numenaMessageHelper.initConnection(new ResultsListener<byte[]>() {
+            numenaMessageHelper.initConnection(new ResultsListener<NumenaResponse>() {
                 @Override
-                public void onSuccess(byte[] result) {
+                public void onSuccess(NumenaResponse result) {
                     executeGetUsersCall(query, listener);
                 }
 
@@ -59,13 +60,13 @@ public class NumenaMessageHandler {
         }
     }
 
-    public void register(final String title,final byte[] organisationId,final byte[] appData,final ResultsListener<byte[]> listener) {
+    public void register(final String title,final byte[] organisationId,final byte[] appData,final ResultsListener<NumenaResponse> listener) {
         if (numenaMessageHelper.isConnectionEstablished()) {
             executeRegisterCall(title, organisationId, appData, listener);
         } else {
-            numenaMessageHelper.initConnection(new ResultsListener<byte[]>() {
+            numenaMessageHelper.initConnection(new ResultsListener<NumenaResponse>() {
                 @Override
-                public void onSuccess(byte[] result) {
+                public void onSuccess(NumenaResponse result) {
                     executeRegisterCall(title, organisationId, appData, listener);
                 }
 
@@ -78,12 +79,12 @@ public class NumenaMessageHandler {
 
     }
 
-    private void executeGetUsersCall(String query, ResultsListener<byte[]> listener){
+    private void executeGetUsersCall(String query, ResultsListener<NumenaResponse> listener){
         numenaMessageHelper.buildAndSendGetUsers(query, listener);
 
     }
 
-    private void executeRegisterCall(String title, byte[] organisationId, byte[] appData, ResultsListener<byte[]> listener) {
+    private void executeRegisterCall(String title, byte[] organisationId, byte[] appData, ResultsListener<NumenaResponse> listener) {
         ValuesManager valuesManager = ValuesManager.getInstance();
         byte[] publicKey = valuesManager.getClientIdentityPublicKey();
         numenaMessageHelper.buildAndSendRegister(title, publicKey, organisationId, appData, listener);
