@@ -7,6 +7,7 @@ import org.libsodium.jni.NaCl;
 import org.libsodium.jni.Sodium;
 
 import numenalibs.co.numenalib.interfaces.ResultsListener;
+import numenalibs.co.numenalib.tools.ValuesManager;
 
 public class Numena {
 
@@ -27,6 +28,10 @@ public class Numena {
 
     public NumenaMessageHandler getMessageHandler() {
         return messageHandler;
+    }
+
+    public ValuesManager getValuesManager(){
+        return ValuesManager.getInstance();
     }
 
     public void setMessageHandler(NumenaMessageHandler messageHandler) {

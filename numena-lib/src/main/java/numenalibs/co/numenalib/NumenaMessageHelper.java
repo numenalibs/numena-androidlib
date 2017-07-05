@@ -85,15 +85,9 @@ public class NumenaMessageHelper {
                         break;
                 }
                 incrementNonces();
-                listener.onSuccess(numenaResponse);
-
-
-//                ValuesManager valuesManager = ValuesManager.getInstance();
-//                buildAndSendGetUsers("e");
-//                buildAndSendRegister("librarytest1", valuesManager.getClientIdentityPublicKey(),valuesManager.getOrganisationId(), "TEssst".getBytes());
+                listener.onCompletion(numenaResponse);
             }
         } catch (InvalidProtocolBufferException e) {
-            listener.onFailure(new NumenaLibraryException("Failed: Could not parse decrypted message as Basemessage"), "Failure");
             throw new NumenaLibraryException("Failed: Could not parse decrypted message as Basemessage");
         }
     }
@@ -136,9 +130,7 @@ public class NumenaMessageHelper {
         try {
             serverHello = buildServerHello(result);
             Basemessage.BaseMessage baseMessage = buildClientHello(serverHello);
-            MessageCallback messageCallback = new MessageCallback();
-            messageCallback.setListener(clientlistener);
-            ResultsListener listener = setupListenerAndCallback(messageCallback);
+            ResultsListener listener = createNewListener(clientlistener);
             singleMessageManager.setListener(listener);
             STATE = Constants.EXPECTING_MESSAGE;
             ValuesManager.getInstance().storeKeysInDatabase();
@@ -175,8 +167,30 @@ public class NumenaMessageHelper {
         return baseMessage;
     }
 
-    public void buildAndSendRegister(String title, byte[] publicKey, byte[] organisationId, byte[] appData, ResultsListener<NumenaResponse> clientlistener){
-        byte[] secretKey = ValuesManager.getInstance().getClientIdentitySecretKey();
+    public void buildAndSendRegister(byte[] publicKey, byte[] secretKey, final String title, byte[] organisationId, byte[] appData, ResultsListener<NumenaResponse> clientlistener){
+        Ledgerinterface.LedgerInterface.UserEvent userEvent = createUserEvent(publicKey,secretKey,title,organisationId,appData);
+        Basemessage.BaseMessage baseMessage = protocolManager.register(userEvent);
+        ResultsListener listener = createNewListener(clientlistener);
+        singleMessageManager.setListener(listener);
+        sendBaseMessage(baseMessage);
+    }
+
+    public void buildAndSendUnRegister(byte[] publicKey, byte[] secretKey, final String title, final byte[] organisationId, final byte[] appData, ResultsListener<NumenaResponse> clientlistener){
+        Ledgerinterface.LedgerInterface.UserEvent userEvent = createUserEvent(publicKey,secretKey,title,organisationId,appData);
+        Basemessage.BaseMessage baseMessage = protocolManager.unregister(userEvent);
+        ResultsListener listener = createNewListener(clientlistener);
+        singleMessageManager.setListener(listener);
+        sendBaseMessage(baseMessage);
+    }
+
+    private ResultsListener createNewListener(ResultsListener<NumenaResponse> clientlistener){
+        MessageCallback messageCallback = new MessageCallback();
+        messageCallback.setListener(clientlistener);
+        ResultsListener listener = setupListenerAndCallback(messageCallback);
+        return listener;
+    }
+
+    private Ledgerinterface.LedgerInterface.UserEvent createUserEvent(byte[] publicKey, byte[] secretKey, final String title, final byte[] organisationId, final byte[] appData){
         byte[] signedMsg = null;
         Ledgerinterface.LedgerInterface.User ownUser = protocolManager.userProto(title, publicKey, organisationId, appData);
         try {
@@ -186,20 +200,13 @@ public class NumenaMessageHelper {
         }
         Ledgerinterface.LedgerInterface.UserEvent.Builder userEventBuilder = protocolManager.userEventProtoBuilder(ownUser);
         Ledgerinterface.LedgerInterface.UserEvent userEvent = protocolManager.setSignatureOnUserEvent(userEventBuilder, signedMsg);
-        Basemessage.BaseMessage baseMessage = protocolManager.register(userEvent);
-        MessageCallback messageCallback = new MessageCallback();
-        messageCallback.setListener(clientlistener);
-        ResultsListener listener = setupListenerAndCallback(messageCallback);
-        singleMessageManager.setListener(listener);
-        sendBaseMessage(baseMessage);
+        return userEvent;
     }
 
     public void buildAndSendGetUsers(String query, ResultsListener<NumenaResponse> clientlistener){
         ValuesManager valuesManager = ValuesManager.getInstance();
         Basemessage.BaseMessage baseMessage = protocolManager.getUsers(query, valuesManager.getOrganisationId());
-        MessageCallback messageCallback = new MessageCallback();
-        messageCallback.setListener(clientlistener);
-        ResultsListener listener = setupListenerAndCallback(messageCallback);
+        ResultsListener listener = createNewListener(clientlistener);
         singleMessageManager.setListener(listener);
         sendBaseMessage(baseMessage);
     }
@@ -242,19 +249,13 @@ public class NumenaMessageHelper {
     private ResultsListener setupListenerAndCallback(final NumenaMethod numenaMethod) {
         ResultsListener openingListener = new ResultsListener<byte[]>() {
             @Override
-            public void onSuccess(byte[] result) {
+            public void onCompletion(byte[] result) {
                 try {
-                    ResultsListener<NumenaResponse> listener = (ResultsListener<NumenaResponse>) numenaMethod.getListener();
                     numenaMethod.setResult(result);
                     numenaMethod.call();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            }
-
-            @Override
-            public void onFailure(Throwable e, String response) {
-
             }
         };
         return openingListener;
