@@ -3,6 +3,8 @@ package numenalibs.co.numenalib.models;
 import android.os.AsyncTask;
 import android.os.Looper;
 
+import static numenalibs.co.numenalib.NumenaMessageHelper.isLocked;
+
 
 public class WorkerThread extends Thread {
 
@@ -12,6 +14,7 @@ public class WorkerThread extends Thread {
         this.numenaMethod = numenaMethod;
     }
     public void run() {
+        isLocked = true;
         if(Looper.myLooper() == null){
             Looper.prepare();
         }

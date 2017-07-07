@@ -4,6 +4,8 @@ import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import java.util.List;
 
@@ -29,7 +31,32 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         numena = Numena.getInstance();
         numena.setupNumenaLibrary(this);
-        registerTest();
+        Button regButton = (Button) findViewById(R.id.registerButton);
+        Button unregButton = (Button) findViewById(R.id.unregisterButton);
+        regButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                numena.getMessageHandler().register(null, null, TESTNAME, TESTORG, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
+                    @Override
+                    public void onCompletion(NumenaResponse result) {
+                        Log.d("REGISTER UI1", result.getStatus());
+                    }
+                });
+            }
+        });
+
+        unregButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                numena.getMessageHandler().unregister(null, null, TESTNAME, TESTORG, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
+                    @Override
+                    public void onCompletion(NumenaResponse result) {
+                        Log.d("UNREGISTER UI1", result.getStatus());
+                    }
+                });
+            }
+        });
+
     }
 
 

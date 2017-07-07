@@ -90,14 +90,15 @@ public class NumenaMessageHelper {
                     default:
                         break;
                 }
-                incrementNonces();
-                listener.onCompletion(numenaResponse);
+
                 if(!initiatingCall){
-                    isLocked = false;
                     BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
                 }else {
                     initiatingCall = false;
                 }
+                incrementNonces();
+                listener.onCompletion(numenaResponse);
+                isLocked = false;
 
             }
         } catch (InvalidProtocolBufferException e) {

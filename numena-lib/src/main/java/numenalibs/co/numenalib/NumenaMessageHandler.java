@@ -44,7 +44,6 @@ public class NumenaMessageHandler {
             int response = b.getInt("KEY");
             if(response == Constants.EXECUTEWORKERTHREAD){
                 if(!isLocked){
-                    isLocked = true;
                     WorkerThread workerThread = forExecute.poll();
                     if(workerThread != null){
                         workerThread.start();
