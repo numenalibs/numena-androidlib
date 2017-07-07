@@ -29,4 +29,10 @@ public class Constants {
     public static final String CLIENT_IDENTITY_SECRETKEY = "CLIENT_IDENTITY_SECRETKEY";
     public static final String LOCAL_NONCE = "LOCAL_NONCE";
     public static final String REMOTE_NONCE = "REMOTE_NONCE";
+
+    /**
+     * BROADCASTCODES
+     */
+
+    public static final int EXECUTEWORKERTHREAD = 123;
 }

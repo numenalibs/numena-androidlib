@@ -22,8 +22,11 @@ import numenalibs.co.numenalib.models.NumenaResponse;
 import numenalibs.co.numenalib.models.NumenaUser;
 import numenalibs.co.numenalib.networking.SingleMessageManager;
 import numenalibs.co.numenalib.protocol.ProtocolManager;
+import numenalibs.co.numenalib.tools.BroadCaster;
 import numenalibs.co.numenalib.tools.Constants;
 import numenalibs.co.numenalib.tools.ValuesManager;
+
+import static numenalibs.co.numenalib.NumenaMessageHandler.CALLBACKEXECUTED;
 
 public class NumenaMessageHelper {
 
@@ -32,6 +35,9 @@ public class NumenaMessageHelper {
     private SingleMessageManager singleMessageManager;
     private static int STATE = 0;
     private boolean connectionEstablished = false;
+    public static boolean isLocked = false;
+    public boolean initiatingCall = true;
+
 
     public NumenaMessageHelper(EncryptionManager encryptionManager, ProtocolManager protocolManager,SingleMessageManager singleMessageManager) {
         this.encryptionManager = encryptionManager;
@@ -54,7 +60,7 @@ public class NumenaMessageHelper {
      * @throws NumenaLibraryException
      */
 
-    public void handleMessage(byte[] msg, ResultsListener<NumenaResponse> listener) throws NumenaLibraryException {
+    public void handleMessage(byte[] msg, final ResultsListener<NumenaResponse> listener) throws NumenaLibraryException {
         try {
             if(STATE == Constants.EXPECTING_SERVERHELLO){
                 handleServerHelloMessage(msg, listener);
@@ -86,6 +92,13 @@ public class NumenaMessageHelper {
                 }
                 incrementNonces();
                 listener.onCompletion(numenaResponse);
+                if(!initiatingCall){
+                    isLocked = false;
+                    BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
+                }else {
+                    initiatingCall = false;
+                }
+
             }
         } catch (InvalidProtocolBufferException e) {
             throw new NumenaLibraryException("Failed: Could not parse decrypted message as Basemessage");
@@ -118,14 +131,12 @@ public class NumenaMessageHelper {
         if(code == 1){
             connectionEstablished = true;
             numenaResponse.setStatus(Constants.RESPONSE_SUCCESS);
-            Log.d("STATUS", "POSITIVE");
         }else {
             numenaResponse.setStatus(Constants.RESPONSE_FAILURE);
-            Log.d("STATUS", "NEGATIVE");
         }
     }
 
-    private void handleServerHelloMessage(byte[] result, ResultsListener<NumenaResponse> clientlistener) {
+    private void handleServerHelloMessage(byte[] result,final ResultsListener<NumenaResponse> clientlistener) {
         Serverhello.ServerHello serverHello = null;
         try {
             serverHello = buildServerHello(result);
@@ -170,7 +181,7 @@ public class NumenaMessageHelper {
     public void buildAndSendRegister(byte[] publicKey, byte[] secretKey, final String title, byte[] organisationId, byte[] appData, ResultsListener<NumenaResponse> clientlistener){
         Ledgerinterface.LedgerInterface.UserEvent userEvent = createUserEvent(publicKey,secretKey,title,organisationId,appData);
         Basemessage.BaseMessage baseMessage = protocolManager.register(userEvent);
-        ResultsListener listener = createNewListener(clientlistener);
+        final ResultsListener listener = createNewListener(clientlistener);
         singleMessageManager.setListener(listener);
         sendBaseMessage(baseMessage);
     }
@@ -178,8 +189,8 @@ public class NumenaMessageHelper {
     public void buildAndSendUnRegister(byte[] publicKey, byte[] secretKey, final String title, final byte[] organisationId, final byte[] appData, ResultsListener<NumenaResponse> clientlistener){
         Ledgerinterface.LedgerInterface.UserEvent userEvent = createUserEvent(publicKey,secretKey,title,organisationId,appData);
         Basemessage.BaseMessage baseMessage = protocolManager.unregister(userEvent);
-        ResultsListener listener = createNewListener(clientlistener);
-        singleMessageManager.setListener(listener);
+        final ResultsListener listener = createNewListener(clientlistener);
+         singleMessageManager.setListener(listener);
         sendBaseMessage(baseMessage);
     }
 
@@ -236,8 +247,6 @@ public class NumenaMessageHelper {
         int currentRemoteNonce = valuesManager.getRemoteNonce();
         valuesManager.setLocalNonce(currentLocalNonce + 2);
         valuesManager.setRemoteNonce(currentRemoteNonce + 2);
-        Log.d("LOCALNONCE", "" + valuesManager.getLocalNonce());
-        Log.d("REMOTENONCE", "" + valuesManager.getRemoteNonce());
     }
 
     /**

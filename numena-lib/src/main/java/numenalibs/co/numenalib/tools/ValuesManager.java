@@ -44,7 +44,6 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     public void refreshKeysFromDatabase(){
         List<Key> keys = databaseHelper.getAllKeys();
         for(Key key : keys){
-            Log.d("Keys", "KEYNAME " + key.getKeyName() + " KEYVALUE " + Utils.printByteArray(key.getKeyValue()));
             this.keys.put(key.getKeyName(),key.getKeyValue());
         }
     }

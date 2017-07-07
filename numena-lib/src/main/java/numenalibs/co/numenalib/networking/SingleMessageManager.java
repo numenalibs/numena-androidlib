@@ -3,7 +3,6 @@ package numenalibs.co.numenalib.networking;
 
 import android.util.Log;
 
-import de.tavendo.autobahn.WebSocket;
 import de.tavendo.autobahn.WebSocketConnection;
 import de.tavendo.autobahn.WebSocketException;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
@@ -14,6 +13,7 @@ public class SingleMessageManager {
     private WebSocketConnection webSocketConnection;
     private NumenaWebSocketHandler numenaWebSocketHandler;
     private ResultsListener<byte[]> listener;
+    private int count = 0;
 
     public void openWebsocket() {
         if (webSocketConnection == null) {
@@ -27,7 +27,6 @@ public class SingleMessageManager {
     private void connectWebsocket() {
         ValuesManager vm = ValuesManager.getInstance();
         try {
-            Log.d("SINGLEMESSAGEHANDLER", "OPENING");
             numenaWebSocketHandler = new NumenaWebSocketHandler(listener);
             webSocketConnection.connect(vm.getConnectionUrl(), numenaWebSocketHandler);
         } catch (WebSocketException e) {
@@ -44,6 +43,7 @@ public class SingleMessageManager {
     }
 
     public void setListener(ResultsListener<byte[]> listener) {
+        count++;
         this.listener = listener;
         if(numenaWebSocketHandler != null)
         numenaWebSocketHandler.setListener(listener);
