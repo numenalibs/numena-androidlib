@@ -60,38 +60,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void registerTest() {
-        numena.getMessageHandler().register(null, null, TESTNAME, TESTORG, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
-            @Override
-            public void onCompletion(NumenaResponse result) {
-                Log.d("REGISTER UI1", result.getStatus());
-            }
-        });
-
-        numena.getMessageHandler().unregister(null, null, TESTNAME, TESTORG, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
-            @Override
-            public void onCompletion(NumenaResponse result) {
-                Log.d("UNREGISTER UI1", result.getStatus());
-            }
-        });
-
-        numena.getMessageHandler().unregister(null, null, TESTNAME, TESTORG, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
-            @Override
-            public void onCompletion(NumenaResponse result) {
-                Log.d("UNREGISTER UI2", result.getStatus());
-            }
-        });
-
-        numena.getMessageHandler().register(null, null, TESTNAME, TESTORG, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
-            @Override
-            public void onCompletion(NumenaResponse result) {
-                Log.d("REGISTER UI2", result.getStatus());
-            }
-        });
-    }
-
-
-
 
 //    private void getUsers(String query) {
 //

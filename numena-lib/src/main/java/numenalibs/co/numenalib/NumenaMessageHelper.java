@@ -26,7 +26,6 @@ import numenalibs.co.numenalib.tools.BroadCaster;
 import numenalibs.co.numenalib.tools.Constants;
 import numenalibs.co.numenalib.tools.ValuesManager;
 
-import static numenalibs.co.numenalib.NumenaMessageHandler.CALLBACKEXECUTED;
 
 public class NumenaMessageHelper {
 
