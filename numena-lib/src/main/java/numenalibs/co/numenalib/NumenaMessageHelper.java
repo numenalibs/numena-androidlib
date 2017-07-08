@@ -45,6 +45,11 @@ public class NumenaMessageHelper {
         STATE = Constants.EXPECTING_SERVERHELLO;
     }
 
+    /**
+     * Initialises the connection to the current server URL
+     * @param clientListener
+     */
+
     public void initConnection(ResultsListener<NumenaResponse> clientListener) {
         MessageCallback messageCallback = new MessageCallback();
         messageCallback.setListener(clientListener);
@@ -110,6 +115,13 @@ public class NumenaMessageHelper {
      * *************************************************************************
      */
 
+    /**
+     * Method for handling a ledgerMessage
+     * It adds a list of NumenaObjects to the NumenaResponse
+     * @param baseMessage
+     * @param numenaResponse
+     */
+
     private void handleLedgerMessage(BaseMessage baseMessage, NumenaResponse numenaResponse) {
         LedgerInterface ledgerInterface = baseMessage.getLedger();
         List<LedgerInterface.User> users = ledgerInterface.getResponse().getUsersList();
@@ -125,6 +137,13 @@ public class NumenaMessageHelper {
         numenaResponse.setNumenaObjects(numenaUsers);
     }
 
+    /**
+     * Method for handling a status message.
+     * It sets a response type on the NumenaResponse according to the statuscode
+     * @param baseMessage
+     * @param numenaResponse
+     */
+
     private void handleStatusMessage(BaseMessage baseMessage, NumenaResponse numenaResponse) {
         StatusMessage status = baseMessage.getStatus();
         long code = status.getStatusCode();
@@ -135,6 +154,12 @@ public class NumenaMessageHelper {
             numenaResponse.setStatus(Constants.RESPONSE_FAILURE);
         }
     }
+
+    /**
+     * Handles the initial msg when connection is established and returns a clienthello to the server
+     * @param result
+     * @param clientlistener
+     */
 
     private void handleServerHelloMessage(byte[] result, final ResultsListener<NumenaResponse> clientlistener) {
         ServerHello serverHello = null;
@@ -157,12 +182,26 @@ public class NumenaMessageHelper {
      * *********************************************************************************
      */
 
+    /**
+     * Builds a serverhello from the bytearray msg gotten when connection is established
+     * @param msg
+     * @return
+     * @throws NumenaLibraryException
+     */
+
     public ServerHello buildServerHello(byte[] msg) throws NumenaLibraryException {
         ServerHello serverHello = protocolManager.extractServerHello(msg);
         ServerHello.Handshake handshake = serverHello.getHandshake();
         encryptionManager.verifyServerhello(serverHello, handshake);
         return serverHello;
     }
+
+    /**
+     * Builds a client hello with the values from the last serverhello
+     * @param serverHello
+     * @return
+     * @throws NumenaLibraryException
+     */
 
     public BaseMessage buildClientHello(ServerHello serverHello) throws NumenaLibraryException {
         ValuesManager valuesManager = ValuesManager.getInstance();
@@ -178,6 +217,17 @@ public class NumenaMessageHelper {
         return baseMessage;
     }
 
+    /**
+     * Builds a basemessage containing a ledgerinterface with type REGISTER
+     * and sends it
+     * @param publicKey
+     * @param secretKey
+     * @param title
+     * @param organisationId
+     * @param appData
+     * @param clientlistener
+     */
+
     public void buildAndSendRegister(byte[] publicKey, byte[] secretKey, final String title, byte[] organisationId, byte[] appData, ResultsListener<NumenaResponse> clientlistener) {
         LedgerInterface.UserEvent userEvent = createUserEvent(publicKey, secretKey, title, organisationId, appData);
         BaseMessage baseMessage = protocolManager.register(userEvent);
@@ -185,6 +235,17 @@ public class NumenaMessageHelper {
         singleMessageManager.setListener(listener);
         sendBaseMessage(baseMessage);
     }
+
+    /**
+     * Builds a basemessage containing a ledgerinterface with type UNREGISTER
+     * and sends it
+     * @param publicKey
+     * @param secretKey
+     * @param title
+     * @param organisationId
+     * @param appData
+     * @param clientlistener
+     */
 
     public void buildAndSendUnRegister(byte[] publicKey, byte[] secretKey, final String title, final byte[] organisationId, final byte[] appData, ResultsListener<NumenaResponse> clientlistener) {
         LedgerInterface.UserEvent userEvent = createUserEvent(publicKey, secretKey, title, organisationId, appData);
@@ -194,12 +255,28 @@ public class NumenaMessageHelper {
         sendBaseMessage(baseMessage);
     }
 
+    /**
+     * Creates a new listener
+     * @param clientlistener
+     * @return
+     */
+
     private ResultsListener createNewListener(ResultsListener<NumenaResponse> clientlistener) {
         MessageCallback messageCallback = new MessageCallback();
         messageCallback.setListener(clientlistener);
         ResultsListener listener = setupListenerAndCallback(messageCallback);
         return listener;
     }
+
+    /**
+     * Method used for creating a userEvent
+     * @param publicKey
+     * @param secretKey
+     * @param title
+     * @param organisationId
+     * @param appData
+     * @return
+     */
 
     private LedgerInterface.UserEvent createUserEvent(byte[] publicKey, byte[] secretKey, final String title, final byte[] organisationId, final byte[] appData) {
         byte[] signedMsg = null;
@@ -214,6 +291,13 @@ public class NumenaMessageHelper {
         return userEvent;
     }
 
+    /**
+     * Builds a base message containing a ledgerinterface with TYPE GETUSER
+     * and sends it
+     * @param query
+     * @param clientlistener
+     */
+
     public void buildAndSendGetUsers(String query, ResultsListener<NumenaResponse> clientlistener) {
         ValuesManager valuesManager = ValuesManager.getInstance();
         BaseMessage baseMessage = protocolManager.getUsers(query, valuesManager.getOrganisationId());
@@ -221,6 +305,11 @@ public class NumenaMessageHelper {
         singleMessageManager.setListener(listener);
         sendBaseMessage(baseMessage);
     }
+
+    /**
+     * Encrypts and sends a basemessage
+     * @param baseMessage
+     */
 
     private void sendBaseMessage(BaseMessage baseMessage) {
         ValuesManager valuesManager = ValuesManager.getInstance();
@@ -240,6 +329,10 @@ public class NumenaMessageHelper {
     public void setConnectionEstablished(boolean connectionEstablished) {
         this.connectionEstablished = connectionEstablished;
     }
+
+    /**
+     * Incrementing nonce values, for both remote and local nonce
+     */
 
     private void incrementNonces() {
         ValuesManager valuesManager = ValuesManager.getInstance();
