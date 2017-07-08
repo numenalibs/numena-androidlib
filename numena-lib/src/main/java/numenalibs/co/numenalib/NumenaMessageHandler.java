@@ -4,10 +4,8 @@ package numenalibs.co.numenalib;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 
 import java.util.LinkedList;
@@ -26,6 +24,9 @@ import numenalibs.co.numenalib.tools.Constants;
 import numenalibs.co.numenalib.tools.ValuesManager;
 
 import static numenalibs.co.numenalib.NumenaMessageHelper.isLocked;
+import static numenalibs.co.numenalib.tools.Constants.BROADCASTCODE;
+import static numenalibs.co.numenalib.tools.Constants.CONTACTTYPE_ADD;
+import static numenalibs.co.numenalib.tools.Constants.CONTACTTYPE_REMOVE;
 
 
 public class NumenaMessageHandler {
@@ -45,7 +46,7 @@ public class NumenaMessageHandler {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             Bundle b = msg.getData();
-            int response = b.getInt("KEY");
+            int response = b.getInt(BROADCASTCODE);
             if (response == Constants.EXECUTEWORKERTHREAD) {
                 if (!isLocked) {
                     NumenaMethod method = forExecute.poll();
@@ -74,15 +75,28 @@ public class NumenaMessageHandler {
     }
 
     /**
-     * Method for adding an addContactCallback to the queue
+     * Method for adding an ContactCallback with type CONTACTTYPE_REMOVE to the queue
+     * @param self
+     * @param numenaUser
+     * @param listener
+     */
+
+    public void removeContact(NumenaUser self, NumenaUser numenaUser,final ResultsListener<NumenaResponse> listener){
+        ContactCallback contactCallback = new ContactCallback(self, numenaUser,CONTACTTYPE_REMOVE, listener);
+        forExecute.add(contactCallback);
+        BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
+    }
+
+    /**
+     * Method for adding an ContactCallback with type CONTACTTYPE_ADD to the queue
      * @param self
      * @param numenaUser
      * @param listener
      */
 
     public void addContact(NumenaUser self, NumenaUser numenaUser,final ResultsListener<NumenaResponse> listener){
-        AddContactCallback addContactCallback = new AddContactCallback(self, numenaUser, listener);
-        forExecute.add(addContactCallback);
+        ContactCallback contactCallback = new ContactCallback(self, numenaUser,CONTACTTYPE_ADD, listener);
+        forExecute.add(contactCallback);
         BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
     }
 
@@ -192,11 +206,15 @@ public class NumenaMessageHandler {
      * @param listener
      */
 
-    private void executeAddContactCall(NumenaUser self, NumenaUser numenaUser, ResultsListener<NumenaResponse> listener) {
+    private void executeContactCall(NumenaUser self, NumenaUser numenaUser, int type, ResultsListener<NumenaResponse> listener) {
         ValuesManager vm = ValuesManager.getInstance();
         self.setPublicKey(vm.getClientIdentityPublicKey());
         self.setSecretKey(vm.getClientIdentitySecretKey());
-        numenaMessageHelper.buildAndSendAddContact(self,numenaUser,listener);
+        if(type == CONTACTTYPE_ADD){
+            numenaMessageHelper.buildAndSendAddContact(self,numenaUser,listener);
+        }else if(type == CONTACTTYPE_REMOVE){
+            numenaMessageHelper.buildAndSendRemoveContact(self,numenaUser,listener);
+        }
     }
 
     /**
@@ -305,26 +323,28 @@ public class NumenaMessageHandler {
         }
     }
 
-    private class AddContactCallback extends NumenaMethod {
+    private class ContactCallback extends NumenaMethod {
 
         private NumenaUser numenaUser, self;
         private ResultsListener listener;
+        private int type;
 
-        public AddContactCallback(NumenaUser self, NumenaUser numenaUser, ResultsListener listener) {
+        public ContactCallback(NumenaUser self, NumenaUser numenaUser, int type, ResultsListener listener) {
             this.numenaUser = numenaUser;
             this.self = self;
+            this.type = type;
             this.listener = listener;
         }
 
         @Override
         public Void call() {
             if (numenaMessageHelper.isConnectionEstablished()) {
-                executeAddContactCall(self,numenaUser, listener);
+                executeContactCall(self,numenaUser,type, listener);
             } else {
                 numenaMessageHelper.initConnection(new ResultsListener<NumenaResponse>() {
                     @Override
                     public void onCompletion(NumenaResponse result) {
-                        executeAddContactCall(self,numenaUser, listener);
+                        executeContactCall(self,numenaUser,type, listener);
                     }
                 });
             }

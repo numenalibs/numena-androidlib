@@ -8,6 +8,8 @@ import android.os.Message;
 import java.util.ArrayList;
 import java.util.List;
 
+import static numenalibs.co.numenalib.tools.Constants.BROADCASTCODE;
+
 public class BroadCaster {
 
     private static BroadCaster broadCaster;
@@ -31,7 +33,7 @@ public class BroadCaster {
             }else {
                 final Message msg = new Message();
                 final Bundle b = new Bundle();
-                b.putInt("KEY", broadcastCode);
+                b.putInt(BROADCASTCODE, broadcastCode);
                 msg.setData(b);
                 handler.sendMessage(msg);
             }

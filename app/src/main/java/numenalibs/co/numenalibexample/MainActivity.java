@@ -77,12 +77,18 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         if(!numenaObjectList.isEmpty()){
-                            NumenaUser numenaUser = (NumenaUser) numenaObjectList.get(0);
-                            NumenaUser self = new NumenaUser(username.getText().toString(),TESTAPPDATA, TESTORG);
+                            final NumenaUser numenaUser = (NumenaUser) numenaObjectList.get(0);
+                            final NumenaUser self = new NumenaUser(username.getText().toString(),TESTAPPDATA, TESTORG);
                             numena.getMessageHandler().addContact(self, numenaUser, new ResultsListener<NumenaResponse>() {
                                 @Override
                                 public void onCompletion(NumenaResponse result) {
                                     Log.d("ADDCONTACT", result.getStatus());
+                                    numena.getMessageHandler().removeContact(self, numenaUser, new ResultsListener<NumenaResponse>() {
+                                        @Override
+                                        public void onCompletion(NumenaResponse result) {
+                                            Log.d("REMOVECONTACT", result.getStatus());
+                                        }
+                                    });
                                 }
                             });
                         }

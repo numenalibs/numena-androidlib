@@ -16,7 +16,8 @@ public class Constants {
     public static final int EXPECTING_MESSAGE = 2;
     public static final String RESPONSE_SUCCESS = "SUCCESIVE_CALL";
     public static final String RESPONSE_FAILURE = "FAILED_CALL";
-
+    public static final int CONTACTTYPE_ADD = 5;
+    public static final int CONTACTTYPE_REMOVE = 6;
     /**
      * KEYNAMES
      */
@@ -33,6 +34,6 @@ public class Constants {
     /**
      * BROADCASTCODES
      */
-
+    public static final String BROADCASTCODE = "BROADCASTCODE";
     public static final int EXECUTEWORKERTHREAD = 123;
 }
