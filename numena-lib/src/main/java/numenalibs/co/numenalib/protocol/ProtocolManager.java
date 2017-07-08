@@ -206,13 +206,13 @@ public class ProtocolManager {
         return basemsg;
     }
 
-    public Ledgerinterface.LedgerInterface.User userProto(String title, byte[] publicKey, byte[] organizationId, byte[] appPbKey) {
+    public Ledgerinterface.LedgerInterface.User userProto(String title, byte[] publicKey, byte[] organizationId, byte[] appData) {
         ByteString my_username = ByteString.copyFrom(title.getBytes());
         Ledgerinterface.LedgerInterface.User.Builder user_builder = Ledgerinterface.LedgerInterface.User.newBuilder();
         user_builder.setUsername(my_username);
         user_builder.setKey(ByteString.copyFrom(publicKey));
         user_builder.setOrganization(ByteString.copyFrom(organizationId));
-        user_builder.setAppData(ByteString.copyFrom(appPbKey));
+        user_builder.setAppData(ByteString.copyFrom(appData));
         Ledgerinterface.LedgerInterface.User userProto = user_builder.build();
         return userProto;
     }
@@ -241,6 +241,67 @@ public class ProtocolManager {
     public Ledgerinterface.LedgerInterface.UserEvent setSignatureOnUserEvent(Ledgerinterface.LedgerInterface.UserEvent.Builder builder, byte[] signature) {
         builder.setSignedMsg(ByteString.copyFrom(signature));
         return builder.build();
+    }
+
+    /**
+     * Method for generating a basemessage containing a contactevent with a type REMOVECONTACT
+     * @param contactEvent
+     * @return
+     */
+
+
+    public Basemessage.BaseMessage removeContact(Ledgerinterface.LedgerInterface.ContactEvent contactEvent) {
+        // LedgerInterface
+        Ledgerinterface.LedgerInterface.Builder ledger_builder = Ledgerinterface.LedgerInterface.newBuilder();
+        ledger_builder.setType(Ledgerinterface.LedgerInterface.Type.REMOVECONTACT);
+        ledger_builder.setRemoveContact(contactEvent);
+        Ledgerinterface.LedgerInterface ledger = ledger_builder.build();
+
+        // BaseMessage
+        Basemessage.BaseMessage.Builder basemsg_builder = Basemessage.BaseMessage.newBuilder();
+        basemsg_builder.setType(Basemessage.BaseMessage.Type.LEDGER);
+        basemsg_builder.setLedger(ledger);
+        Basemessage.BaseMessage basemsg = basemsg_builder.build();
+
+        return basemsg;
+    }
+
+    /**
+     * Method for generating a contactevent from a user to a user.
+     * @param encrypted_other_user
+     * @param userEvent
+     * @return
+     */
+
+    public Ledgerinterface.LedgerInterface.ContactEvent contactEvent(byte[] encrypted_other_user, Ledgerinterface.LedgerInterface.UserEvent userEvent) {
+        // ContactEvent
+        Ledgerinterface.LedgerInterface.ContactEvent.Builder contact_event_builder = Ledgerinterface.LedgerInterface.ContactEvent.newBuilder();
+        contact_event_builder.setUser(userEvent);
+        contact_event_builder.setContact(ByteString.copyFrom(encrypted_other_user));
+        Ledgerinterface.LedgerInterface.ContactEvent contact_event = contact_event_builder.build();
+        return contact_event;
+    }
+
+    /**
+     * Method for generating a basemessage containing a contactevent with a type ADDCONTACT
+     * @param contactEvent
+     * @return
+     */
+
+    public Basemessage.BaseMessage addContact(Ledgerinterface.LedgerInterface.ContactEvent contactEvent) {
+        // LedgerInterface
+        Ledgerinterface.LedgerInterface.Builder ledger_builder = Ledgerinterface.LedgerInterface.newBuilder();
+        ledger_builder.setType(Ledgerinterface.LedgerInterface.Type.ADDCONTACT);
+        ledger_builder.setAddContact(contactEvent);
+        Ledgerinterface.LedgerInterface ledger = ledger_builder.build();
+
+        // BaseMessage
+        Basemessage.BaseMessage.Builder basemsg_builder = Basemessage.BaseMessage.newBuilder();
+        basemsg_builder.setType(Basemessage.BaseMessage.Type.LEDGER);
+        basemsg_builder.setLedger(ledger);
+        Basemessage.BaseMessage basemsg = basemsg_builder.build();
+
+        return basemsg;
     }
 
 }

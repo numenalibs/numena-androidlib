@@ -8,10 +8,13 @@ public class NumenaUser extends NumenaObject {
     private String username;
     private byte[] appData;
     private byte[] publicKey;
+    private byte[] secretKey;
     private byte[] organisationId;
 
-    public NumenaUser() {
-
+    public NumenaUser(String username, byte[] appData, byte[] organisationId) {
+        this.username = username;
+        this.appData = Arrays.copyOf(appData,appData.length);
+        this.organisationId = Arrays.copyOf(organisationId,organisationId.length);
     }
 
     public NumenaUser(String username, byte[] appData, byte[] publicKey, byte[] organisationId) {
@@ -19,6 +22,14 @@ public class NumenaUser extends NumenaObject {
         this.appData = Arrays.copyOf(appData,appData.length);
         this.publicKey = Arrays.copyOf(publicKey,publicKey.length);
         this.organisationId = Arrays.copyOf(organisationId,organisationId.length);
+    }
+
+    public byte[] getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(byte[] secretKey) {
+        this.secretKey =  Arrays.copyOf(secretKey, secretKey.length);
     }
 
     public String getUsername() {
@@ -42,7 +53,7 @@ public class NumenaUser extends NumenaObject {
     }
 
     public void setPublicKey(byte[] publicKey) {
-        this.publicKey = publicKey;
+        this.publicKey =  Arrays.copyOf(publicKey, publicKey.length);
     }
 
     public byte[] getOrganisationId() {

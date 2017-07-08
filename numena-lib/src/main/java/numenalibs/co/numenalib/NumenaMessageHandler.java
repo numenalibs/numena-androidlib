@@ -17,6 +17,7 @@ import numenalibs.co.numenalib.encryption.EncryptionManager;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
 import numenalibs.co.numenalib.models.NumenaMethod;
 import numenalibs.co.numenalib.models.NumenaResponse;
+import numenalibs.co.numenalib.models.NumenaUser;
 import numenalibs.co.numenalib.models.WorkerThread;
 import numenalibs.co.numenalib.networking.SingleMessageManager;
 import numenalibs.co.numenalib.protocol.ProtocolManager;
@@ -36,8 +37,7 @@ public class NumenaMessageHandler {
     private Queue<NumenaMethod> forExecute = new LinkedList<NumenaMethod>();
 
     /**
-     * Handler used for executing a thread per called method.
-     * Uses a queue to poll the current workerthread.
+     * Handler used for executing a thread once a NumenaMethod is polled from the queue.
      */
 
     private Handler mHandler = new Handler() {
@@ -71,6 +71,19 @@ public class NumenaMessageHandler {
         ValuesManager valuesManager = ValuesManager.getInstance();
         valuesManager.initDatabase(context);
         encryptionManager.setupKeys();
+    }
+
+    /**
+     * Method for adding an addContactCallback to the queue
+     * @param self
+     * @param numenaUser
+     * @param listener
+     */
+
+    public void addContact(NumenaUser self, NumenaUser numenaUser,final ResultsListener<NumenaResponse> listener){
+        AddContactCallback addContactCallback = new AddContactCallback(self, numenaUser, listener);
+        forExecute.add(addContactCallback);
+        BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
     }
 
     /**
@@ -174,6 +187,21 @@ public class NumenaMessageHandler {
     /**
      * Method that executes the call for getUsers
      * Using NumenaMessageHelper to build and send a basemessage with type LEDGER
+     * @param self
+     * @param numenaUser
+     * @param listener
+     */
+
+    private void executeAddContactCall(NumenaUser self, NumenaUser numenaUser, ResultsListener<NumenaResponse> listener) {
+        ValuesManager vm = ValuesManager.getInstance();
+        self.setPublicKey(vm.getClientIdentityPublicKey());
+        self.setSecretKey(vm.getClientIdentitySecretKey());
+        numenaMessageHelper.buildAndSendAddContact(self,numenaUser,listener);
+    }
+
+    /**
+     * Method that executes the call for getUsers
+     * Using NumenaMessageHelper to build and send a basemessage with type LEDGER
      *
      * @param query
      * @param listener
@@ -270,6 +298,33 @@ public class NumenaMessageHandler {
                     @Override
                     public void onCompletion(NumenaResponse result) {
                         executeGetUsersCall(query, listener);
+                    }
+                });
+            }
+            return null;
+        }
+    }
+
+    private class AddContactCallback extends NumenaMethod {
+
+        private NumenaUser numenaUser, self;
+        private ResultsListener listener;
+
+        public AddContactCallback(NumenaUser self, NumenaUser numenaUser, ResultsListener listener) {
+            this.numenaUser = numenaUser;
+            this.self = self;
+            this.listener = listener;
+        }
+
+        @Override
+        public Void call() {
+            if (numenaMessageHelper.isConnectionEstablished()) {
+                executeAddContactCall(self,numenaUser, listener);
+            } else {
+                numenaMessageHelper.initConnection(new ResultsListener<NumenaResponse>() {
+                    @Override
+                    public void onCompletion(NumenaResponse result) {
+                        executeAddContactCall(self,numenaUser, listener);
                     }
                 });
             }

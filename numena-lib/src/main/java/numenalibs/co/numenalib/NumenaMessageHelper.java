@@ -10,6 +10,7 @@ import java.util.List;
 
 import messages.Basemessage.BaseMessage;
 import messages.Clienthello.ClientHello;
+import messages.Ledgerinterface;
 import messages.Ledgerinterface.LedgerInterface;
 import messages.Serverhello.ServerHello;
 import messages.Statusmessage.StatusMessage;
@@ -33,7 +34,7 @@ public class NumenaMessageHelper {
     private ProtocolManager protocolManager;
     private SingleMessageManager singleMessageManager;
     private static int STATE = 0;
-    private boolean connectionEstablished = false;
+    public static boolean connectionEstablished = false;
     public static boolean isLocked = false;
     public boolean initiatingCall = true;
 
@@ -164,6 +165,7 @@ public class NumenaMessageHelper {
     private void handleServerHelloMessage(byte[] result, final ResultsListener<NumenaResponse> clientlistener) {
         ServerHello serverHello = null;
         try {
+            initiatingCall = true;
             serverHello = buildServerHello(result);
             BaseMessage baseMessage = buildClientHello(serverHello);
             ResultsListener listener = createNewListener(clientlistener);
@@ -234,6 +236,37 @@ public class NumenaMessageHelper {
         final ResultsListener listener = createNewListener(clientlistener);
         singleMessageManager.setListener(listener);
         sendBaseMessage(baseMessage);
+    }
+
+    public LedgerInterface.ContactEvent buildContactEvent(NumenaUser self, NumenaUser contact){
+        LedgerInterface.UserEvent userEvent = createUserEvent(self.getPublicKey(),self.getSecretKey(), self.getUsername(), self.getOrganisationId(), self.getAppData());
+        LedgerInterface.User protoContact = protocolManager.userProto(contact.getUsername(),contact.getPublicKey(), contact.getOrganisationId(), contact.getAppData());
+        byte[] encryptedContactBytes = null;
+        try {
+            encryptedContactBytes = encryptionManager.encryptMessage(protoContact.toByteArray(),protoContact.getSerializedSize(),0);
+        } catch (NumenaLibraryException e) {
+            e.printStackTrace();
+        }
+        LedgerInterface.ContactEvent contactEvent = protocolManager.contactEvent(encryptedContactBytes, userEvent);
+        return contactEvent;
+    }
+
+    public void buildAndSendRemoveContact(NumenaUser self, NumenaUser contact, ResultsListener<NumenaResponse> clientlistener){
+        LedgerInterface.ContactEvent contactEvent = buildContactEvent(self,contact);
+        BaseMessage baseMessage = protocolManager.removeContact(contactEvent);
+        final ResultsListener listener = createNewListener(clientlistener);
+        singleMessageManager.setListener(listener);
+        sendBaseMessage(baseMessage);
+
+    }
+
+    public void buildAndSendAddContact(NumenaUser self, NumenaUser contact, ResultsListener<NumenaResponse> clientlistener){
+        LedgerInterface.ContactEvent contactEvent = buildContactEvent(self,contact);
+        BaseMessage baseMessage = protocolManager.addContact(contactEvent);
+        final ResultsListener listener = createNewListener(clientlistener);
+        singleMessageManager.setListener(listener);
+        sendBaseMessage(baseMessage);
+
     }
 
     /**

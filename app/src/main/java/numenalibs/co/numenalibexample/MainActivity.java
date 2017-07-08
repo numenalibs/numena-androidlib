@@ -75,6 +75,17 @@ public class MainActivity extends AppCompatActivity {
                             NumenaUser numenaUser = (NumenaUser) numenaObject;
                             Log.d("NumenaUSER", numenaUser.getUsername() + " Organisation " + new String(numenaUser.getOrganisationId()) + " Publickey " + Utils.printByteArray(numenaUser.getPublicKey()));
                         }
+
+                        if(!numenaObjectList.isEmpty()){
+                            NumenaUser numenaUser = (NumenaUser) numenaObjectList.get(0);
+                            NumenaUser self = new NumenaUser(username.getText().toString(),TESTAPPDATA, TESTORG);
+                            numena.getMessageHandler().addContact(self, numenaUser, new ResultsListener<NumenaResponse>() {
+                                @Override
+                                public void onCompletion(NumenaResponse result) {
+                                    Log.d("ADDCONTACT", result.getStatus());
+                                }
+                            });
+                        }
                     }
                 });
             }
