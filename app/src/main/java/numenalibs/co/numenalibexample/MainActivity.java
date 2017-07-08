@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import java.util.List;
 
@@ -20,8 +21,6 @@ import numenalibs.co.numenalib.tools.Utils;
 public class MainActivity extends AppCompatActivity {
 
     private Numena numena;
-    private boolean firstDone = false;
-    private static String TESTNAME = "LIBTEST34g";
     private static byte[] TESTORG = "LIBTESTman2".getBytes();
     private static byte[] TESTAPPDATA = "LIBTESTman2".getBytes();
 
@@ -31,12 +30,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         numena = Numena.getInstance();
         numena.setupNumenaLibrary(this);
+
         Button regButton = (Button) findViewById(R.id.registerButton);
         Button unregButton = (Button) findViewById(R.id.unregisterButton);
+        Button getUsersButton = (Button) findViewById(R.id.getUsersButton);
+
+        final EditText username = (EditText) findViewById(R.id.userNameEditText);
+        final EditText query = (EditText) findViewById(R.id.getUsersEditText);
+
         regButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                numena.getMessageHandler().register(null, null, TESTNAME, TESTORG, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
+                numena.getMessageHandler().register(null, null, username.getText().toString(), TESTORG, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
                     @Override
                     public void onCompletion(NumenaResponse result) {
                         Log.d("REGISTER UI1", result.getStatus());
@@ -48,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         unregButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                numena.getMessageHandler().unregister(null, null, TESTNAME, TESTORG, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
+                numena.getMessageHandler().unregister(null, null, username.getText().toString(), TESTORG, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
                     @Override
                     public void onCompletion(NumenaResponse result) {
                         Log.d("UNREGISTER UI1", result.getStatus());
@@ -57,35 +62,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        getUsersButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                numena.getMessageHandler().getUsers(query.getText().toString(), new ResultsListener<NumenaResponse>() {
+                    @Override
+                    public void onCompletion(NumenaResponse result) {
+                        String status = result.getStatus();
+                        Log.d("GETUSERS", status);
+                        List<NumenaObject> numenaObjectList = result.getNumenaObjects();
+                        for (NumenaObject numenaObject : numenaObjectList) {
+                            NumenaUser numenaUser = (NumenaUser) numenaObject;
+                            Log.d("NumenaUSER", numenaUser.getUsername() + " Organisation " + new String(numenaUser.getOrganisationId()) + " Publickey " + Utils.printByteArray(numenaUser.getPublicKey()));
+                        }
+                    }
+                });
+            }
+        });
     }
-
-
-
-//    private void getUsers(String query) {
-//
-//        ResultsListener l = new ResultsListener() {
-//            @Override
-//            public void onCompletion(Object result) {
-//
-//            }
-//        };
-//
-//        numena.getMessageHandler().getUsers(query, new ResultsListener<NumenaResponse>() {
-//            @Override
-//            public void onCompletion(NumenaResponse result) {
-//                String status = result.getStatus();
-//                Log.d("GETUSERS", status);
-//                List<NumenaObject> numenaObjectList = result.getNumenaObjects();
-//                for (NumenaObject numenaObject : numenaObjectList) {
-//                    NumenaUser numenaUser = (NumenaUser) numenaObject;
-//                    Log.d("NumenaUSER", numenaUser.getUsername() + " Organisation " + new String(numenaUser.getOrganisationId()) + " Publickey " + Utils.printByteArray(numenaUser.getPublicKey()));
-//                }
-//                if (!firstDone) {
-//                    firstDone = true;
-//                    getUsers("r");
-//                }
-//            }
-//
-//        });
-//    }
 }

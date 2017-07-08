@@ -40,16 +40,16 @@ public class NumenaMessageHandler {
      * Uses a queue to poll the current workerthread.
      */
 
-    private Handler mHandler = new Handler(){
+    private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             Bundle b = msg.getData();
             int response = b.getInt("KEY");
-            if(response == Constants.EXECUTEWORKERTHREAD){
-                if(!isLocked){
+            if (response == Constants.EXECUTEWORKERTHREAD) {
+                if (!isLocked) {
                     NumenaMethod method = forExecute.poll();
-                    if(method != null){
+                    if (method != null) {
                         WorkerThread workerThread = new WorkerThread();
                         workerThread.setNumenaMethod(method);
                         workerThread.start();
@@ -73,22 +73,23 @@ public class NumenaMessageHandler {
         encryptionManager.setupKeys();
     }
 
+    /**
+     * Method for adding a getUsers callback to the queue
+     *
+     * @param query
+     * @param listener
+     */
+
     public void getUsers(final String query, final ResultsListener<NumenaResponse> listener) {
-        if (numenaMessageHelper.isConnectionEstablished()) {
-            executeGetUsersCall(query, listener);
-        } else {
-            numenaMessageHelper.initConnection(new ResultsListener<NumenaResponse>() {
-                @Override
-                public void onCompletion(NumenaResponse result) {
-                    executeGetUsersCall(query, listener);
-                }
-            });
-        }
+        GetUsersCallback getUsersCallback = new GetUsersCallback(query, listener);
+        forExecute.add(getUsersCallback);
+        BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
     }
 
     /**
-     * Method for adding a callback to the
+     * Method for adding a register callback to the queue
      * If Public- and secretkey is nulled the first forged identitykeys are used
+     *
      * @param publicKey
      * @param secretKey
      * @param title
@@ -104,8 +105,9 @@ public class NumenaMessageHandler {
     }
 
     /**
-     * Method used for unregistering a user to the connected server.
+     * Method for adding a unregister callback to the queue
      * If Public- and secretkey is nulled the first forged identitykeys are used
+     *
      * @param publicKey
      * @param secretKey
      * @param title
@@ -121,8 +123,9 @@ public class NumenaMessageHandler {
     }
 
     /**
-     *  Method that executes the call for register.
-     *  Using NumenaMessageHelper to build and send a basemessage with type REGISTER
+     * Method that executes the call for register.
+     * Using NumenaMessageHelper to build and send a basemessage with type LEDGER
+     *
      * @param publicKey
      * @param secretKey
      * @param title
@@ -145,8 +148,9 @@ public class NumenaMessageHandler {
     }
 
     /**
-     *  Method that executes the call for unregister.
-     *  Using NumenaMessageHelper to build and send a basemessage with type REGISTER
+     * Method that executes the call for unregister.
+     * Using NumenaMessageHelper to build and send a basemessage with type LEDGER
+     *
      * @param publicKey
      * @param secretKey
      * @param title
@@ -167,11 +171,16 @@ public class NumenaMessageHandler {
         numenaMessageHelper.buildAndSendUnRegister(usedPubKey, usedSecretKey, title, organisationId, appData, listener);
     }
 
-
+    /**
+     * Method that executes the call for getUsers
+     * Using NumenaMessageHelper to build and send a basemessage with type LEDGER
+     *
+     * @param query
+     * @param listener
+     */
 
     private void executeGetUsersCall(final String query, ResultsListener<NumenaResponse> listener) {
         numenaMessageHelper.buildAndSendGetUsers(query, listener);
-
     }
 
 
@@ -179,7 +188,7 @@ public class NumenaMessageHandler {
      * CALLBACKS
      *************************************************************/
 
-    class RegisterCallback extends NumenaMethod {
+    private class RegisterCallback extends NumenaMethod {
 
         private byte[] publicKey, secretKey, organisationId, appData;
         private String title;
@@ -210,7 +219,7 @@ public class NumenaMessageHandler {
         }
     }
 
-    class UnRegisterCallback extends NumenaMethod {
+    private class UnRegisterCallback extends NumenaMethod {
 
         private byte[] publicKey, secretKey, organisationId, appData;
         private String title;
@@ -235,6 +244,32 @@ public class NumenaMessageHandler {
                     public void onCompletion(NumenaResponse result) {
                         executeUnregisterCall(publicKey, secretKey, title, organisationId, appData, listener);
 
+                    }
+                });
+            }
+            return null;
+        }
+    }
+
+    private class GetUsersCallback extends NumenaMethod {
+
+        private String query;
+        private ResultsListener listener;
+
+        public GetUsersCallback(String query, ResultsListener listener) {
+            this.query = query;
+            this.listener = listener;
+        }
+
+        @Override
+        public Void call() {
+            if (numenaMessageHelper.isConnectionEstablished()) {
+                executeGetUsersCall(query, listener);
+            } else {
+                numenaMessageHelper.initConnection(new ResultsListener<NumenaResponse>() {
+                    @Override
+                    public void onCompletion(NumenaResponse result) {
+                        executeGetUsersCall(query, listener);
                     }
                 });
             }

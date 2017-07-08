@@ -5,6 +5,7 @@ import android.util.Log;
 
 import de.tavendo.autobahn.WebSocketConnection;
 import de.tavendo.autobahn.WebSocketException;
+import de.tavendo.autobahn.WebSocketOptions;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
 import numenalibs.co.numenalib.tools.ValuesManager;
 
@@ -28,7 +29,11 @@ public class SingleMessageManager {
         ValuesManager vm = ValuesManager.getInstance();
         try {
             numenaWebSocketHandler = new NumenaWebSocketHandler(listener);
-            webSocketConnection.connect(vm.getConnectionUrl(), numenaWebSocketHandler);
+            WebSocketOptions options = new WebSocketOptions();
+            options.setSocketConnectTimeout(15000);
+            options.setMaxMessagePayloadSize(10000000); //max size of message
+            options.setMaxFramePayloadSize(10000000); //max size of frame
+            webSocketConnection.connect(vm.getConnectionUrl(), numenaWebSocketHandler, options);
         } catch (WebSocketException e) {
             e.printStackTrace();
         }

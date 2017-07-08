@@ -2,6 +2,7 @@ package numenalibs.co.numenalib.models;
 
 import android.os.AsyncTask;
 import android.os.Looper;
+import android.util.Log;
 
 import static numenalibs.co.numenalib.NumenaMessageHelper.isLocked;
 
