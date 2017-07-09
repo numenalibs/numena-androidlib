@@ -21,11 +21,13 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
-import messages.Basemessage;
 import messages.Basemessage.BaseMessage;
-import messages.Clienthello;
-import messages.Databaseinterface;
-import messages.Ledgerinterface;
+import messages.Clienthello.ClientHello;
+import messages.Databaseinterface.DatabaseInterface;
+import messages.Ledgerinterface.LedgerInterface;
+import messages.Databaseinterface.DatabaseInterface;
+import messages.Databaseinterface.DatabaseInterface.DatabaseObject;
+import messages.Databaseinterface.DatabaseInterface.DatabaseObject.Capability;
 import messages.Serverhello.ServerHello;
 import messages.Serverhello.ServerHello.Handshake;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
@@ -47,7 +49,7 @@ public class ProtocolManager {
 
     }
 
-    private void setKeysFromServerHello(ServerHello srvHello) throws NumenaLibraryException{
+    private void setKeysFromServerHello(ServerHello srvHello) throws NumenaLibraryException {
         ValuesManager vm = ValuesManager.getInstance();
         ServerHello.Handshake handshake = srvHello.getHandshake();
         ByteString srvPubKey = handshake.getServerConnectionPublicKey();
@@ -75,7 +77,7 @@ public class ProtocolManager {
         try {
             basemessage = BaseMessage.parseFrom(msg);
             BaseMessage.Type msgtype = basemessage.getType();
-            boolean isServerHello = msgtype.equals(Basemessage.BaseMessage.Type.SERVERHELLO);
+            boolean isServerHello = msgtype.equals(BaseMessage.Type.SERVERHELLO);
             if (!isServerHello) {
                 throw new NumenaLibraryException("Failing to parse Numena Serverhello. Reason: not correct msg type");
             }
@@ -88,7 +90,7 @@ public class ProtocolManager {
         }
     }
 
-    public void createClientConnectionKeys()throws NumenaLibraryException{
+    public void createClientConnectionKeys() throws NumenaLibraryException {
         byte[] tempclient_connection_pk = new byte[Sodium.crypto_box_publickeybytes()];
         byte[] tempclient_connection_sk = new byte[Sodium.crypto_box_secretkeybytes()];
         if (crypto_box_keypair(tempclient_connection_pk, tempclient_connection_sk) != 0) {
@@ -99,10 +101,10 @@ public class ProtocolManager {
         vm.setClientConnectionSecretKey(tempclient_connection_sk);
     }
 
-    public Clienthello.ClientHello.Handshake buildClientHelloHandshake(ServerHello serverHello) throws NumenaLibraryException{
+    public ClientHello.Handshake buildClientHelloHandshake(ServerHello serverHello) throws NumenaLibraryException {
         //Generate a ClientHello.Handshake message and populate the fields
         ValuesManager vm = ValuesManager.getInstance();
-        Clienthello.ClientHello.Handshake.Builder clientHandshakeBuilder = Clienthello.ClientHello.Handshake.newBuilder();
+        ClientHello.Handshake.Builder clientHandshakeBuilder = ClientHello.Handshake.newBuilder();
         //Message type
         clientHandshakeBuilder.setMessageType(Constants.MESSAGETYPE_CLIENTHELLO_HANDSHAKE);
         //client_connection_public_key
@@ -121,209 +123,213 @@ public class ProtocolManager {
         clientHandshakeBuilder.setHashedServerHello(hashedSrvBytes);
         //Length of server hello
         clientHandshakeBuilder.setLengthOfServerHello(srvHello.length);
-        Clienthello.ClientHello.Handshake clientHandshake = clientHandshakeBuilder.build();
-        return  clientHandshake;
+        ClientHello.Handshake clientHandshake = clientHandshakeBuilder.build();
+        return clientHandshake;
     }
 
-    public Clienthello.ClientHello.SignedHandshake buildSignedHandshake(Clienthello.ClientHello.Handshake clientHandshake, byte[] inputDstSignature){
-        Clienthello.ClientHello.SignedHandshake.Builder signedHandshakeBuilder = Clienthello.ClientHello.SignedHandshake.newBuilder();
+    public ClientHello.SignedHandshake buildSignedHandshake(ClientHello.Handshake clientHandshake, byte[] inputDstSignature) {
+        ClientHello.SignedHandshake.Builder signedHandshakeBuilder = ClientHello.SignedHandshake.newBuilder();
         signedHandshakeBuilder.setHandshake(clientHandshake);
         ValuesManager valuesManager = ValuesManager.getInstance();
         byte[] dstSignature = new byte[SodiumConstants.SIGNATURE_BYTES];
-        if(inputDstSignature != null){
+        if (inputDstSignature != null) {
             dstSignature = inputDstSignature;
             signedHandshakeBuilder.setIdentityPublicKey(ByteString.copyFrom(valuesManager.getClientIdentityPublicKey()));
             signedHandshakeBuilder.setHandshakeSignature(ByteString.copyFrom(dstSignature));
         }
         // 8.2 Check if we're communicating with organization server
-        Clienthello.ClientHello.SignedHandshake signedHandshake = signedHandshakeBuilder.build();
+        ClientHello.SignedHandshake signedHandshake = signedHandshakeBuilder.build();
         return signedHandshake;
     }
 
 
-
-    public Basemessage.BaseMessage packClientHello(byte[] ciphertext) throws NumenaLibraryException{
+    public BaseMessage packClientHello(byte[] ciphertext) throws NumenaLibraryException {
         ValuesManager valuesManager = ValuesManager.getInstance();
-        Clienthello.ClientHello.Builder client_hello_builder = Clienthello.ClientHello.newBuilder();
+        ClientHello.Builder client_hello_builder = ClientHello.newBuilder();
         client_hello_builder.setClientConnectionPublicKey(ByteString.copyFrom(valuesManager.getClientConnectionPublicKey()));
         client_hello_builder.setEncryptedHandshake(ByteString.copyFrom(ciphertext));
-        Clienthello.ClientHello client_hello = client_hello_builder.build();
-        Basemessage.BaseMessage.Builder basemessage_builder = Basemessage.BaseMessage.newBuilder();
-        basemessage_builder.setType(Basemessage.BaseMessage.Type.CLIENTHELLO);
+        ClientHello client_hello = client_hello_builder.build();
+        BaseMessage.Builder basemessage_builder = BaseMessage.newBuilder();
+        basemessage_builder.setType(BaseMessage.Type.CLIENTHELLO);
         basemessage_builder.setClientHello(client_hello);
         return basemessage_builder.build();
     }
 
-    public Basemessage.BaseMessage getUsers(String query, byte[] organizationId) {
+    public BaseMessage getUsers(String query, byte[] organizationId) {
         byte[] emptyKey = new byte[0];
         // User
-        Ledgerinterface.LedgerInterface.User.Builder userbuilder = Ledgerinterface.LedgerInterface.User.newBuilder();
+        LedgerInterface.User.Builder userbuilder = LedgerInterface.User.newBuilder();
         userbuilder.setUsername(ByteString.copyFrom(query.getBytes()));
         userbuilder.setOrganization(ByteString.copyFrom(organizationId));
         userbuilder.setKey(ByteString.copyFrom(emptyKey));
-        Ledgerinterface.LedgerInterface.User user = userbuilder.build();
+        LedgerInterface.User user = userbuilder.build();
 
         // Ledgerinterface
-        Ledgerinterface.LedgerInterface.Builder ledger_builder = Ledgerinterface.LedgerInterface.newBuilder();
-        ledger_builder.setType(Ledgerinterface.LedgerInterface.Type.GETUSER);
+        LedgerInterface.Builder ledger_builder = LedgerInterface.newBuilder();
+        ledger_builder.setType(LedgerInterface.Type.GETUSER);
         ledger_builder.setGetUser(user);
-        Ledgerinterface.LedgerInterface ledger = ledger_builder.build();
+        LedgerInterface ledger = ledger_builder.build();
 
         // BaseMessage
-        Basemessage.BaseMessage.Builder basemsg_builder = Basemessage.BaseMessage.newBuilder();
-        basemsg_builder.setType(Basemessage.BaseMessage.Type.LEDGER);
+        BaseMessage.Builder basemsg_builder = BaseMessage.newBuilder();
+        basemsg_builder.setType(BaseMessage.Type.LEDGER);
         basemsg_builder.setLedger(ledger);
-        Basemessage.BaseMessage basemsg = basemsg_builder.build();
+        BaseMessage basemsg = basemsg_builder.build();
 
         return basemsg;
     }
 
-    public Basemessage.BaseMessage register(Ledgerinterface.LedgerInterface.UserEvent reg_user) {
+    public BaseMessage register(LedgerInterface.UserEvent reg_user) {
         // Ledgerinterface
-        Ledgerinterface.LedgerInterface.Builder ledger_builder = Ledgerinterface.LedgerInterface.newBuilder();
-        ledger_builder.setType(Ledgerinterface.LedgerInterface.Type.REGISTER);
+        LedgerInterface.Builder ledger_builder = LedgerInterface.newBuilder();
+        ledger_builder.setType(LedgerInterface.Type.REGISTER);
         ledger_builder.setRegisterUser(reg_user);
-        Ledgerinterface.LedgerInterface ledger = ledger_builder.build();
+        LedgerInterface ledger = ledger_builder.build();
 
         // BaseMessage
-        Basemessage.BaseMessage.Builder basemsg_builder = Basemessage.BaseMessage.newBuilder();
-        basemsg_builder.setType(Basemessage.BaseMessage.Type.LEDGER);
+        BaseMessage.Builder basemsg_builder = BaseMessage.newBuilder();
+        basemsg_builder.setType(BaseMessage.Type.LEDGER);
         basemsg_builder.setLedger(ledger);
-        Basemessage.BaseMessage basemsg = basemsg_builder.build();
+        BaseMessage basemsg = basemsg_builder.build();
 
         return basemsg;
     }
 
-    public Basemessage.BaseMessage unregister(Ledgerinterface.LedgerInterface.UserEvent unreg_user) {
+    public BaseMessage unregister(LedgerInterface.UserEvent unreg_user) {
         // LedgerInterface
-        Ledgerinterface.LedgerInterface.Builder ledger_builder = Ledgerinterface.LedgerInterface.newBuilder();
-        ledger_builder.setType(Ledgerinterface.LedgerInterface.Type.UNREGISTER);
+        LedgerInterface.Builder ledger_builder = LedgerInterface.newBuilder();
+        ledger_builder.setType(LedgerInterface.Type.UNREGISTER);
         ledger_builder.setUnregisterUser(unreg_user);
-        Ledgerinterface.LedgerInterface ledger = ledger_builder.build();
+        LedgerInterface ledger = ledger_builder.build();
 
         // BaseMessage
-        Basemessage.BaseMessage.Builder basemsg_builder = Basemessage.BaseMessage.newBuilder();
-        basemsg_builder.setType(Basemessage.BaseMessage.Type.LEDGER);
+        BaseMessage.Builder basemsg_builder = BaseMessage.newBuilder();
+        basemsg_builder.setType(BaseMessage.Type.LEDGER);
         basemsg_builder.setLedger(ledger);
-        Basemessage.BaseMessage basemsg = basemsg_builder.build();
+        BaseMessage basemsg = basemsg_builder.build();
 
         return basemsg;
     }
 
-    public Ledgerinterface.LedgerInterface.User userProto(String title, byte[] publicKey, byte[] organizationId, byte[] appData) {
+    public LedgerInterface.User userProto(String title, byte[] publicKey, byte[] organizationId, byte[] appData) {
         ByteString my_username = ByteString.copyFrom(title.getBytes());
-        Ledgerinterface.LedgerInterface.User.Builder user_builder = Ledgerinterface.LedgerInterface.User.newBuilder();
+        LedgerInterface.User.Builder user_builder = LedgerInterface.User.newBuilder();
         user_builder.setUsername(my_username);
         user_builder.setKey(ByteString.copyFrom(publicKey));
         user_builder.setOrganization(ByteString.copyFrom(organizationId));
         user_builder.setAppData(ByteString.copyFrom(appData));
-        Ledgerinterface.LedgerInterface.User userProto = user_builder.build();
+        LedgerInterface.User userProto = user_builder.build();
         return userProto;
     }
 
     /**
      * This method returns a build containing a user ledgerinterface.
      * Usually used to gain a build to sign a message with.
+     *
      * @param user
      * @return
      */
 
-    public Ledgerinterface.LedgerInterface.UserEvent.Builder userEventProtoBuilder(Ledgerinterface.LedgerInterface.User user) {
+    public LedgerInterface.UserEvent.Builder userEventProtoBuilder(LedgerInterface.User user) {
         // UserEvent
-        Ledgerinterface.LedgerInterface.UserEvent.Builder remove_UserEvent_builder = Ledgerinterface.LedgerInterface.UserEvent.newBuilder();
+        LedgerInterface.UserEvent.Builder remove_UserEvent_builder = LedgerInterface.UserEvent.newBuilder();
         remove_UserEvent_builder.setUser(user);
         return remove_UserEvent_builder;
     }
 
     /**
      * Sets a signature on a builder and returns a userevent.
+     *
      * @param builder
      * @param signature
      * @return
      */
 
-    public Ledgerinterface.LedgerInterface.UserEvent setSignatureOnUserEvent(Ledgerinterface.LedgerInterface.UserEvent.Builder builder, byte[] signature) {
+    public LedgerInterface.UserEvent setSignatureOnUserEvent(LedgerInterface.UserEvent.Builder builder, byte[] signature) {
         builder.setSignedMsg(ByteString.copyFrom(signature));
         return builder.build();
     }
 
     /**
      * Method for generating a basemessage containing a contactevent with a type REMOVECONTACT
+     *
      * @param contactEvent
      * @return
      */
 
 
-    public Basemessage.BaseMessage removeContact(Ledgerinterface.LedgerInterface.ContactEvent contactEvent) {
+    public BaseMessage removeContact(LedgerInterface.ContactEvent contactEvent) {
         // LedgerInterface
-        Ledgerinterface.LedgerInterface.Builder ledger_builder = Ledgerinterface.LedgerInterface.newBuilder();
-        ledger_builder.setType(Ledgerinterface.LedgerInterface.Type.REMOVECONTACT);
+        LedgerInterface.Builder ledger_builder = LedgerInterface.newBuilder();
+        ledger_builder.setType(LedgerInterface.Type.REMOVECONTACT);
         ledger_builder.setRemoveContact(contactEvent);
-        Ledgerinterface.LedgerInterface ledger = ledger_builder.build();
+        LedgerInterface ledger = ledger_builder.build();
 
         // BaseMessage
-        Basemessage.BaseMessage.Builder basemsg_builder = Basemessage.BaseMessage.newBuilder();
-        basemsg_builder.setType(Basemessage.BaseMessage.Type.LEDGER);
+        BaseMessage.Builder basemsg_builder = BaseMessage.newBuilder();
+        basemsg_builder.setType(BaseMessage.Type.LEDGER);
         basemsg_builder.setLedger(ledger);
-        Basemessage.BaseMessage basemsg = basemsg_builder.build();
+        BaseMessage basemsg = basemsg_builder.build();
 
         return basemsg;
     }
 
     /**
      * Method for generating a contactevent from a user to a user.
+     *
      * @param encrypted_other_user
      * @param userEvent
      * @return
      */
 
-    public Ledgerinterface.LedgerInterface.ContactEvent contactEvent(byte[] encrypted_other_user, Ledgerinterface.LedgerInterface.UserEvent userEvent) {
+    public LedgerInterface.ContactEvent contactEvent(byte[] encrypted_other_user, LedgerInterface.UserEvent userEvent) {
         // ContactEvent
-        Ledgerinterface.LedgerInterface.ContactEvent.Builder contact_event_builder = Ledgerinterface.LedgerInterface.ContactEvent.newBuilder();
+        LedgerInterface.ContactEvent.Builder contact_event_builder = LedgerInterface.ContactEvent.newBuilder();
         contact_event_builder.setUser(userEvent);
         contact_event_builder.setContact(ByteString.copyFrom(encrypted_other_user));
-        Ledgerinterface.LedgerInterface.ContactEvent contact_event = contact_event_builder.build();
+        LedgerInterface.ContactEvent contact_event = contact_event_builder.build();
         return contact_event;
     }
 
     /**
      * Method for generating a basemessage containing a contactevent with a type ADDCONTACT
+     *
      * @param contactEvent
      * @return
      */
 
-    public Basemessage.BaseMessage addContact(Ledgerinterface.LedgerInterface.ContactEvent contactEvent) {
+    public BaseMessage addContact(LedgerInterface.ContactEvent contactEvent) {
         // LedgerInterface
-        Ledgerinterface.LedgerInterface.Builder ledger_builder = Ledgerinterface.LedgerInterface.newBuilder();
-        ledger_builder.setType(Ledgerinterface.LedgerInterface.Type.ADDCONTACT);
+        LedgerInterface.Builder ledger_builder = LedgerInterface.newBuilder();
+        ledger_builder.setType(LedgerInterface.Type.ADDCONTACT);
         ledger_builder.setAddContact(contactEvent);
-        Ledgerinterface.LedgerInterface ledger = ledger_builder.build();
+        LedgerInterface ledger = ledger_builder.build();
 
         // BaseMessage
-        Basemessage.BaseMessage.Builder basemsg_builder = Basemessage.BaseMessage.newBuilder();
-        basemsg_builder.setType(Basemessage.BaseMessage.Type.LEDGER);
+        BaseMessage.Builder basemsg_builder = BaseMessage.newBuilder();
+        basemsg_builder.setType(BaseMessage.Type.LEDGER);
         basemsg_builder.setLedger(ledger);
-        Basemessage.BaseMessage basemsg = basemsg_builder.build();
+        BaseMessage basemsg = basemsg_builder.build();
 
         return basemsg;
     }
 
-    public List<Databaseinterface.DatabaseInterface.DatabaseObject.Capability> generateVerifiers(List<NumenaUser> users, boolean writePermission, boolean readPermission) {
+    public List<Capability> generateVerifiers(List<NumenaUser> users, boolean writePermission, boolean readPermission) {
         // Capability
-        List<Databaseinterface.DatabaseInterface.DatabaseObject.Capability> verifiers = new ArrayList<>();
+        List<Capability> verifiers = new ArrayList<>();
 
         for (int i = 0; i < users.size(); i++) {
             NumenaUser tempUser = users.get(i);
             byte[] publickKey = tempUser.getPublicKey();
             String userName = tempUser.getUsername();
 
-            Databaseinterface.DatabaseInterface.DatabaseObject.Capability.Builder capability_builder = Databaseinterface.DatabaseInterface.DatabaseObject.Capability.newBuilder();
+            Capability.Builder capability_builder = Capability.newBuilder();
             capability_builder.setUsername(ByteString.copyFrom(userName.getBytes()));
             capability_builder.setWrite(writePermission);
             capability_builder.setRead(readPermission);
             ByteString key = ByteString.copyFrom(publickKey);
             capability_builder.setKey(key);
-            Databaseinterface.DatabaseInterface.DatabaseObject.Capability capability = capability_builder.build();
+            Capability capability = capability_builder.build();
             verifiers.add(capability);
         }
 
@@ -331,10 +337,10 @@ public class ProtocolManager {
 
     }
 
-    public Basemessage.BaseMessage storeObject(List<Databaseinterface.DatabaseInterface.DatabaseObject.Capability> verifiers, byte[] organizationId, byte[] appId, byte[] toBeSaved) {
+    public BaseMessage storeObject(List<Capability> verifiers, byte[] organizationId, byte[] appId, byte[] toBeSaved) {
         try {
             // DatabaseObject
-            Databaseinterface.DatabaseInterface.DatabaseObject.Builder database_object_builder = Databaseinterface.DatabaseInterface.DatabaseObject.newBuilder();
+            DatabaseObject.Builder database_object_builder = DatabaseObject.newBuilder();
 
             database_object_builder.setEncryptedMessage(ByteString.copyFrom(toBeSaved));
             database_object_builder.setAppId(ByteString.copyFrom(appId));
@@ -348,24 +354,24 @@ public class ProtocolManager {
             byte[] msg_hash = md.digest();
             database_object_builder.setMessageHash(ByteString.copyFrom(msg_hash));
             //database_object_builder.setPreviousMessageHash();
-            Databaseinterface.DatabaseInterface.DatabaseObject database_object = database_object_builder.build();
+            DatabaseObject database_object = database_object_builder.build();
 
             // StoreObject
-            Databaseinterface.DatabaseInterface.StoreObject.Builder store_obj_builder = Databaseinterface.DatabaseInterface.StoreObject.newBuilder();
+            DatabaseInterface.StoreObject.Builder store_obj_builder = DatabaseInterface.StoreObject.newBuilder();
             store_obj_builder.setObject(database_object);
-            Databaseinterface.DatabaseInterface.StoreObject store_obj = store_obj_builder.build();
+            DatabaseInterface.StoreObject store_obj = store_obj_builder.build();
 
             // DatabaseInterface
-            Databaseinterface.DatabaseInterface.Builder database_interface_builder = Databaseinterface.DatabaseInterface.newBuilder();
-            database_interface_builder.setType(Databaseinterface.DatabaseInterface.Type.STORE);
+            DatabaseInterface.Builder database_interface_builder = DatabaseInterface.newBuilder();
+            database_interface_builder.setType(DatabaseInterface.Type.STORE);
             database_interface_builder.setStoreObject(store_obj);
-            Databaseinterface.DatabaseInterface database_interface = database_interface_builder.build();
+            DatabaseInterface database_interface = database_interface_builder.build();
 
             // BaseMessage
-            Basemessage.BaseMessage.Builder base_msg_builder = Basemessage.BaseMessage.newBuilder();
-            base_msg_builder.setType(Basemessage.BaseMessage.Type.DATABASE);
+            BaseMessage.Builder base_msg_builder = BaseMessage.newBuilder();
+            base_msg_builder.setType(BaseMessage.Type.DATABASE);
             base_msg_builder.setDatabase(database_interface);
-            Basemessage.BaseMessage base_msg = base_msg_builder.build();
+            BaseMessage base_msg = base_msg_builder.build();
 
             return base_msg;
         } catch (NoSuchAlgorithmException e) {
