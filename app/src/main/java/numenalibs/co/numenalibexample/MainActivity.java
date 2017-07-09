@@ -1,5 +1,6 @@
 package numenalibs.co.numenalibexample;
 
+import android.content.Intent;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         Button regButton = (Button) findViewById(R.id.registerButton);
         Button unregButton = (Button) findViewById(R.id.unregisterButton);
         Button getUsersButton = (Button) findViewById(R.id.getUsersButton);
+        Button nextActButton = (Button) findViewById(R.id.nextActivityButton);
 
         final EditText username = (EditText) findViewById(R.id.userNameEditText);
         final EditText query = (EditText) findViewById(R.id.getUsersEditText);
@@ -94,6 +96,14 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+            }
+        });
+
+        nextActButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, NextActivity.class);
+                startActivity(intent);
             }
         });
     }

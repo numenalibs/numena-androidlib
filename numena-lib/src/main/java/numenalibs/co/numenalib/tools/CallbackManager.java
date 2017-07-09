@@ -36,11 +36,11 @@ public class CallbackManager {
         return new UnRegisterCallback(publicKey, secretKey, title, organisationId, appData, listener);
     }
 
-    public GetUsersCallback makeGetUsersCallback(String query, ResultsListener<NumenaResponse> listener){
+    public GetUsersCallback makeGetUsersCallback(String query, ResultsListener<NumenaResponse> listener) {
         return new GetUsersCallback(query, listener);
     }
 
-    public ContactCallback makeContactsCallback(NumenaUser self, NumenaUser contact, int type, ResultsListener<NumenaResponse> listener){
+    public ContactCallback makeContactsCallback(NumenaUser self, NumenaUser contact, int type, ResultsListener<NumenaResponse> listener) {
         return new ContactCallback(self, contact, type, listener);
     }
 
@@ -156,8 +156,6 @@ public class CallbackManager {
         private byte[] publicKey, secretKey, organisationId, appData;
         private String title;
         private ResultsListener listener;
-
-
 
         public RegisterCallback(@Nullable final byte[] publicKey, @Nullable final byte[] secretKey, final String title, final byte[] organisationId, final byte[] appData, final ResultsListener<NumenaResponse> listener) {
             this.publicKey = publicKey;

@@ -96,7 +96,6 @@ public class NumenaMessageHandler {
         BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
     }
 
-
     /**
      * Method for adding an ContactCallback with type CONTACTTYPE_REMOVE to the queue
      *

@@ -52,5 +52,12 @@
         android:text="GETUSERS" />
 
 
+    <Button
+        android:id="@+id/nextActivityButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NEXT ACTIVITY" />
+
+
 
 </LinearLayout>

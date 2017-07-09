@@ -49,6 +49,7 @@ public class NumenaMessageHelper {
 
     /**
      * Initialises the connection to the current server URL
+     *
      * @param clientListener
      */
 
@@ -120,6 +121,7 @@ public class NumenaMessageHelper {
     /**
      * Method for handling a ledgerMessage
      * It adds a list of NumenaObjects to the NumenaResponse
+     *
      * @param baseMessage
      * @param numenaResponse
      */
@@ -142,6 +144,7 @@ public class NumenaMessageHelper {
     /**
      * Method for handling a status message.
      * It sets a response type on the NumenaResponse according to the statuscode
+     *
      * @param baseMessage
      * @param numenaResponse
      */
@@ -159,6 +162,7 @@ public class NumenaMessageHelper {
 
     /**
      * Handles the initial msg when connection is established and returns a clienthello to the server
+     *
      * @param result
      * @param clientlistener
      */
@@ -187,6 +191,7 @@ public class NumenaMessageHelper {
 
     /**
      * Builds a serverhello from the bytearray msg gotten when connection is established
+     *
      * @param msg
      * @return
      * @throws NumenaLibraryException
@@ -201,6 +206,7 @@ public class NumenaMessageHelper {
 
     /**
      * Builds a client hello with the values from the last serverhello
+     *
      * @param serverHello
      * @return
      * @throws NumenaLibraryException
@@ -223,6 +229,7 @@ public class NumenaMessageHelper {
     /**
      * Builds a basemessage containing a ledgerinterface with type REGISTER
      * and sends it
+     *
      * @param publicKey
      * @param secretKey
      * @param title
@@ -239,12 +246,12 @@ public class NumenaMessageHelper {
         sendBaseMessage(baseMessage);
     }
 
-    public LedgerInterface.ContactEvent buildContactEvent(NumenaUser self, NumenaUser contact){
-        LedgerInterface.UserEvent userEvent = createUserEvent(self.getPublicKey(),self.getSecretKey(), self.getUsername(), self.getOrganisationId(), self.getAppData());
-        LedgerInterface.User protoContact = protocolManager.userProto(contact.getUsername(),contact.getPublicKey(), contact.getOrganisationId(), contact.getAppData());
+    public LedgerInterface.ContactEvent buildContactEvent(NumenaUser self, NumenaUser contact) {
+        LedgerInterface.UserEvent userEvent = createUserEvent(self.getPublicKey(), self.getSecretKey(), self.getUsername(), self.getOrganisationId(), self.getAppData());
+        LedgerInterface.User protoContact = protocolManager.userProto(contact.getUsername(), contact.getPublicKey(), contact.getOrganisationId(), contact.getAppData());
         byte[] encryptedContactBytes = null;
         try {
-            encryptedContactBytes = encryptionManager.encryptMessage(protoContact.toByteArray(),protoContact.getSerializedSize(),0);
+            encryptedContactBytes = encryptionManager.encryptMessage(protoContact.toByteArray(), protoContact.getSerializedSize(), 0);
         } catch (NumenaLibraryException e) {
             e.printStackTrace();
         }
@@ -252,8 +259,8 @@ public class NumenaMessageHelper {
         return contactEvent;
     }
 
-    public void buildAndSendRemoveContact(NumenaUser self, NumenaUser contact, ResultsListener<NumenaResponse> clientlistener){
-        LedgerInterface.ContactEvent contactEvent = buildContactEvent(self,contact);
+    public void buildAndSendRemoveContact(NumenaUser self, NumenaUser contact, ResultsListener<NumenaResponse> clientlistener) {
+        LedgerInterface.ContactEvent contactEvent = buildContactEvent(self, contact);
         BaseMessage baseMessage = protocolManager.removeContact(contactEvent);
         final ResultsListener listener = createNewListener(clientlistener);
         singleMessageManager.setListener(listener);
@@ -261,8 +268,8 @@ public class NumenaMessageHelper {
 
     }
 
-    public void buildAndSendAddContact(NumenaUser self, NumenaUser contact, ResultsListener<NumenaResponse> clientlistener){
-        LedgerInterface.ContactEvent contactEvent = buildContactEvent(self,contact);
+    public void buildAndSendAddContact(NumenaUser self, NumenaUser contact, ResultsListener<NumenaResponse> clientlistener) {
+        LedgerInterface.ContactEvent contactEvent = buildContactEvent(self, contact);
         BaseMessage baseMessage = protocolManager.addContact(contactEvent);
         final ResultsListener listener = createNewListener(clientlistener);
         singleMessageManager.setListener(listener);
@@ -270,8 +277,8 @@ public class NumenaMessageHelper {
 
     }
 
-    public void buildAndStoreObject(List<NumenaUser> userList, byte[] content, byte[] organisationId, byte[] appId, boolean writePermission, boolean readPermission, ResultsListener<NumenaResponse> clientlistener){
-        List<Databaseinterface.DatabaseInterface.DatabaseObject.Capability> verifiers = protocolManager.generateVerifiers(userList,writePermission, readPermission);
+    public void buildAndStoreObject(List<NumenaUser> userList, byte[] content, byte[] organisationId, byte[] appId, boolean writePermission, boolean readPermission, ResultsListener<NumenaResponse> clientlistener) {
+        List<Databaseinterface.DatabaseInterface.DatabaseObject.Capability> verifiers = protocolManager.generateVerifiers(userList, writePermission, readPermission);
         BaseMessage baseMessage = protocolManager.storeObject(verifiers, organisationId, appId, content);
         final ResultsListener listener = createNewListener(clientlistener);
         singleMessageManager.setListener(listener);
@@ -281,6 +288,7 @@ public class NumenaMessageHelper {
     /**
      * Builds a basemessage containing a ledgerinterface with type UNREGISTER
      * and sends it
+     *
      * @param publicKey
      * @param secretKey
      * @param title
@@ -299,6 +307,7 @@ public class NumenaMessageHelper {
 
     /**
      * Creates a new listener
+     *
      * @param clientlistener
      * @return
      */
@@ -312,6 +321,7 @@ public class NumenaMessageHelper {
 
     /**
      * Method used for creating a userEvent
+     *
      * @param publicKey
      * @param secretKey
      * @param title
@@ -336,6 +346,7 @@ public class NumenaMessageHelper {
     /**
      * Builds a base message containing a ledgerinterface with TYPE GETUSER
      * and sends it
+     *
      * @param query
      * @param clientlistener
      */
@@ -350,6 +361,7 @@ public class NumenaMessageHelper {
 
     /**
      * Encrypts and sends a basemessage
+     *
      * @param baseMessage
      */
 
