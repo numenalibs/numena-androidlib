@@ -10,6 +10,7 @@ import java.util.List;
 
 import messages.Basemessage.BaseMessage;
 import messages.Clienthello.ClientHello;
+import messages.Databaseinterface;
 import messages.Ledgerinterface;
 import messages.Ledgerinterface.LedgerInterface;
 import messages.Serverhello.ServerHello;
@@ -267,6 +268,14 @@ public class NumenaMessageHelper {
         singleMessageManager.setListener(listener);
         sendBaseMessage(baseMessage);
 
+    }
+
+    public void buildAndStoreObject(List<NumenaUser> userList, byte[] content, byte[] organisationId, byte[] appId, boolean writePermission, boolean readPermission, ResultsListener<NumenaResponse> clientlistener){
+        List<Databaseinterface.DatabaseInterface.DatabaseObject.Capability> verifiers = protocolManager.generateVerifiers(userList,writePermission, readPermission);
+        BaseMessage baseMessage = protocolManager.storeObject(verifiers, organisationId, appId, content);
+        final ResultsListener listener = createNewListener(clientlistener);
+        singleMessageManager.setListener(listener);
+        sendBaseMessage(baseMessage);
     }
 
     /**

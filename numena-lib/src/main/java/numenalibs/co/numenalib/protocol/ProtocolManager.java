@@ -15,17 +15,21 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
 
 import messages.Basemessage;
 import messages.Basemessage.BaseMessage;
 import messages.Clienthello;
+import messages.Databaseinterface;
 import messages.Ledgerinterface;
 import messages.Serverhello.ServerHello;
 import messages.Serverhello.ServerHello.Handshake;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
+import numenalibs.co.numenalib.models.NumenaUser;
 import numenalibs.co.numenalib.tools.Constants;
 import numenalibs.co.numenalib.tools.ValuesManager;
 
@@ -302,6 +306,72 @@ public class ProtocolManager {
         Basemessage.BaseMessage basemsg = basemsg_builder.build();
 
         return basemsg;
+    }
+
+    public List<Databaseinterface.DatabaseInterface.DatabaseObject.Capability> generateVerifiers(List<NumenaUser> users, boolean writePermission, boolean readPermission) {
+        // Capability
+        List<Databaseinterface.DatabaseInterface.DatabaseObject.Capability> verifiers = new ArrayList<>();
+
+        for (int i = 0; i < users.size(); i++) {
+            NumenaUser tempUser = users.get(i);
+            byte[] publickKey = tempUser.getPublicKey();
+            String userName = tempUser.getUsername();
+
+            Databaseinterface.DatabaseInterface.DatabaseObject.Capability.Builder capability_builder = Databaseinterface.DatabaseInterface.DatabaseObject.Capability.newBuilder();
+            capability_builder.setUsername(ByteString.copyFrom(userName.getBytes()));
+            capability_builder.setWrite(writePermission);
+            capability_builder.setRead(readPermission);
+            ByteString key = ByteString.copyFrom(publickKey);
+            capability_builder.setKey(key);
+            Databaseinterface.DatabaseInterface.DatabaseObject.Capability capability = capability_builder.build();
+            verifiers.add(capability);
+        }
+
+        return verifiers;
+
+    }
+
+    public Basemessage.BaseMessage storeObject(List<Databaseinterface.DatabaseInterface.DatabaseObject.Capability> verifiers, byte[] organizationId, byte[] appId, byte[] toBeSaved) {
+        try {
+            // DatabaseObject
+            Databaseinterface.DatabaseInterface.DatabaseObject.Builder database_object_builder = Databaseinterface.DatabaseInterface.DatabaseObject.newBuilder();
+
+            database_object_builder.setEncryptedMessage(ByteString.copyFrom(toBeSaved));
+            database_object_builder.setAppId(ByteString.copyFrom(appId));
+            database_object_builder.setOrgId(ByteString.copyFrom(organizationId));
+            database_object_builder.addAllVerifier(verifiers);
+            database_object_builder.setTimestamp(System.currentTimeMillis());
+            //database_object_builder.setExpiration();
+            MessageDigest md = MessageDigest.getInstance(Constants.SHA256_ENCODING);
+            md.update(toBeSaved);
+
+            byte[] msg_hash = md.digest();
+            database_object_builder.setMessageHash(ByteString.copyFrom(msg_hash));
+            //database_object_builder.setPreviousMessageHash();
+            Databaseinterface.DatabaseInterface.DatabaseObject database_object = database_object_builder.build();
+
+            // StoreObject
+            Databaseinterface.DatabaseInterface.StoreObject.Builder store_obj_builder = Databaseinterface.DatabaseInterface.StoreObject.newBuilder();
+            store_obj_builder.setObject(database_object);
+            Databaseinterface.DatabaseInterface.StoreObject store_obj = store_obj_builder.build();
+
+            // DatabaseInterface
+            Databaseinterface.DatabaseInterface.Builder database_interface_builder = Databaseinterface.DatabaseInterface.newBuilder();
+            database_interface_builder.setType(Databaseinterface.DatabaseInterface.Type.STORE);
+            database_interface_builder.setStoreObject(store_obj);
+            Databaseinterface.DatabaseInterface database_interface = database_interface_builder.build();
+
+            // BaseMessage
+            Basemessage.BaseMessage.Builder base_msg_builder = Basemessage.BaseMessage.newBuilder();
+            base_msg_builder.setType(Basemessage.BaseMessage.Type.DATABASE);
+            base_msg_builder.setDatabase(database_interface);
+            Basemessage.BaseMessage base_msg = base_msg_builder.build();
+
+            return base_msg;
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

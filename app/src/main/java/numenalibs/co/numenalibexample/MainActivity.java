@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import numenalibs.co.numenalib.Numena;
@@ -78,19 +79,18 @@ public class MainActivity extends AppCompatActivity {
 
                         if(!numenaObjectList.isEmpty()){
                             final NumenaUser numenaUser = (NumenaUser) numenaObjectList.get(0);
-                            final NumenaUser self = new NumenaUser(username.getText().toString(),TESTAPPDATA, TESTORG);
-                            numena.getMessageHandler().addContact(self, numenaUser, new ResultsListener<NumenaResponse>() {
+                            final NumenaUser numenaUser2 = (NumenaUser) numenaObjectList.get(1);
+                            List<NumenaUser> numenaUsers = new ArrayList<NumenaUser>();
+                            numenaUsers.add(numenaUser);
+                            numenaUsers.add(numenaUser2);
+                            numena.getMessageHandler().storeObject(numenaUsers, "hey".getBytes(), "lol".getBytes(), "apptest".getBytes(), true, true, new ResultsListener<NumenaResponse>() {
                                 @Override
                                 public void onCompletion(NumenaResponse result) {
-                                    Log.d("ADDCONTACT", result.getStatus());
-                                    numena.getMessageHandler().removeContact(self, numenaUser, new ResultsListener<NumenaResponse>() {
-                                        @Override
-                                        public void onCompletion(NumenaResponse result) {
-                                            Log.d("REMOVECONTACT", result.getStatus());
-                                        }
-                                    });
+                                    String status = result.getStatus();
+                                    Log.d("STOREOBJECT", status);
                                 }
                             });
+
                         }
                     }
                 });
