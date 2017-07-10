@@ -30,7 +30,7 @@ public class SingleMessageManager {
         try {
             numenaWebSocketHandler = new NumenaWebSocketHandler(listener);
             WebSocketOptions options = new WebSocketOptions();
-            options.setSocketConnectTimeout(15000);
+            options.setSocketConnectTimeout(5000);
             options.setMaxMessagePayloadSize(10000000); //max size of message
             options.setMaxFramePayloadSize(10000000); //max size of frame
             webSocketConnection.connect(vm.getConnectionUrl(), numenaWebSocketHandler, options);
