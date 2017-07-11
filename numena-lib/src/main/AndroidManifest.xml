@@ -7,13 +7,6 @@
     <application  android:label="@string/app_name"
         android:supportsRtl="true">
 
-        <provider
-            android:name=".tools.NumenaProvider"
-            android:authorities="numenalibs.co.numenalib.tools.NumenaProvider"
-            android:exported="false"
-            android:protectionLevel="signature"
-            android:syncable="true"/>
-
     </application>
 
 
