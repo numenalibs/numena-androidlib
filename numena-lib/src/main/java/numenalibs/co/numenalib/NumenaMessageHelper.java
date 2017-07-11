@@ -151,6 +151,7 @@ public class NumenaMessageHelper {
 
     private void handleStatusMessage(BaseMessage baseMessage, NumenaResponse numenaResponse) {
         StatusMessage status = baseMessage.getStatus();
+
         long code = status.getStatusCode();
         if (code == 1) {
             connectionEstablished = true;
