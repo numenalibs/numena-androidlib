@@ -3,10 +3,6 @@ package numenalibs.co.numenalib;
 
 import android.content.Context;
 
-import org.libsodium.jni.NaCl;
-import org.libsodium.jni.Sodium;
-
-import numenalibs.co.numenalib.interfaces.ResultsListener;
 import numenalibs.co.numenalib.tools.ValuesManager;
 
 public class Numena {
@@ -23,7 +19,7 @@ public class Numena {
     }
 
     public void setupNumenaLibrary(Context context){
-        instance.getMessageHandler().startNumenaCommunication(context);
+        instance.getMessageHandler().initNumenaValues(context);
     }
 
     public NumenaMessageHandler getMessageHandler() {

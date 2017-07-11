@@ -73,7 +73,7 @@ public class NumenaMessageHandler {
         callbackManager = new CallbackManager(numenaMessageHelper);
     }
 
-    public void startNumenaCommunication(Context context) {
+    public void initNumenaValues(Context context) {
         ValuesManager valuesManager = ValuesManager.getInstance();
         valuesManager.initDatabase(context);
         encryptionManager.setupKeys();

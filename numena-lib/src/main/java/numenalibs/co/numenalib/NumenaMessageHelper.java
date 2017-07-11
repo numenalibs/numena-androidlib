@@ -377,7 +377,7 @@ public class NumenaMessageHelper {
     }
 
     public boolean isConnectionEstablished() {
-        return connectionEstablished;
+        return singleMessageManager.isWebsocketConnected();
     }
 
     public void setConnectionEstablished(boolean connectionEstablished) {

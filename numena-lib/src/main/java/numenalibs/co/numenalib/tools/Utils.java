@@ -1,6 +1,12 @@
 package numenalibs.co.numenalib.tools;
 
 
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -33,6 +39,22 @@ public class Utils {
             return Arrays.toString(output);
         }
         return " EMPTY INPUT ";
+    }
+
+    public static boolean numenaProviderExists(Context context){
+        boolean found = false;
+        for (PackageInfo pack : context.getPackageManager().getInstalledPackages(PackageManager.GET_PROVIDERS)) {
+            ProviderInfo[] providers = pack.providers;
+            if (providers != null) {
+                for (ProviderInfo provider : providers) {
+                    Log.d("Example", "provider: " + provider.authority);
+                    found = provider.authority.equals("numenalibs.co.numenalib.tools.NumenaProvider");
+                    if(found) break;
+                }
+            }
+            if (found) break;
+        }
+        return found;
     }
 
 }

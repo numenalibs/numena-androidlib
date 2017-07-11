@@ -27,6 +27,7 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     private byte[] organisationId = "Numena".getBytes();
     private static ValuesManager instance;
     private DatabaseHelper databaseHelper;
+    private NumenaProvider dataManager;
 
     public static ValuesManager getInstance(){
         if(instance == null){

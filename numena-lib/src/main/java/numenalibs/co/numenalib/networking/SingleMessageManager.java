@@ -14,7 +14,6 @@ public class SingleMessageManager {
     private WebSocketConnection webSocketConnection;
     private NumenaWebSocketHandler numenaWebSocketHandler;
     private ResultsListener<byte[]> listener;
-    private int count = 0;
 
     public void openWebsocket() {
         if (webSocketConnection == null) {
@@ -25,12 +24,19 @@ public class SingleMessageManager {
         }
     }
 
+    public boolean isWebsocketConnected(){
+        if(webSocketConnection == null){
+            return false;
+        }
+        return webSocketConnection.isConnected();
+    }
+
     private void connectWebsocket() {
         ValuesManager vm = ValuesManager.getInstance();
         try {
             numenaWebSocketHandler = new NumenaWebSocketHandler(listener);
             WebSocketOptions options = new WebSocketOptions();
-            options.setSocketConnectTimeout(5000);
+            options.setSocketConnectTimeout(1000);
             options.setMaxMessagePayloadSize(10000000); //max size of message
             options.setMaxFramePayloadSize(10000000); //max size of frame
             webSocketConnection.connect(vm.getConnectionUrl(), numenaWebSocketHandler, options);
@@ -48,7 +54,6 @@ public class SingleMessageManager {
     }
 
     public void setListener(ResultsListener<byte[]> listener) {
-        count++;
         this.listener = listener;
         if(numenaWebSocketHandler != null)
         numenaWebSocketHandler.setListener(listener);
