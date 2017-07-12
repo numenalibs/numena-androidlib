@@ -55,6 +55,7 @@ public class NumenaMessageHandler {
                 if (!isLocked) {
                     NumenaMethod method = forExecute.poll();
                     if (method != null) {
+                        isLocked = true;
                         WorkerThread workerThread = new WorkerThread();
                         workerThread.setNumenaMethod(method);
                         workerThread.start();

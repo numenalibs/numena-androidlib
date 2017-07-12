@@ -15,7 +15,6 @@ public class WorkerThread extends Thread {
         this.numenaMethod = numenaMethod;
     }
     public void run() {
-        isLocked = true;
         if(Looper.myLooper() == null){
             Looper.prepare();
         }

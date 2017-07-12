@@ -68,36 +68,18 @@ public class MainActivity extends AppCompatActivity {
         getUsersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                numena.getMessageHandler().getUsers(query.getText().toString(), new ResultsListener<NumenaResponse>() {
-                    @Override
-                    public void onCompletion(NumenaResponse result) {
-                        String status = result.getStatus();
-                        Log.d("GETUSERS", status);
-                        List<NumenaObject> numenaObjectList = result.getNumenaObjects();
-                        for (NumenaObject numenaObject : numenaObjectList) {
-                            NumenaUser numenaUser = (NumenaUser) numenaObject;
-                            Log.d("NumenaUSER", numenaUser.getUsername() + " Organisation " + new String(numenaUser.getOrganisationId()) + " Publickey " + Utils.printByteArray(numenaUser.getPublicKey()));
+                for(int i = 0 ; i < 10 ; i++) {
+                    numena.getMessageHandler().getUsers(query.getText().toString(), new ResultsListener<NumenaResponse>() {
+                        @Override
+                        public void onCompletion(NumenaResponse result) {
+                            Log.d("STATUS IS ", result.getStatus());
                         }
-
-                        if(!numenaObjectList.isEmpty()){
-                            final NumenaUser numenaUser = (NumenaUser) numenaObjectList.get(0);
-                            final NumenaUser numenaUser2 = (NumenaUser) numenaObjectList.get(1);
-                            List<NumenaUser> numenaUsers = new ArrayList<NumenaUser>();
-                            numenaUsers.add(numenaUser);
-                            numenaUsers.add(numenaUser2);
-                            numena.getMessageHandler().storeObject(numenaUsers, "hey".getBytes(), "lol".getBytes(), "apptest".getBytes(), true, true, new ResultsListener<NumenaResponse>() {
-                                @Override
-                                public void onCompletion(NumenaResponse result) {
-                                    String status = result.getStatus();
-                                    Log.d("STOREOBJECT", status);
-                                }
-                            });
-
-                        }
-                    }
-                });
+                    });
+                }
             }
         });
+
+
 
         nextActButton.setOnClickListener(new View.OnClickListener() {
             @Override
