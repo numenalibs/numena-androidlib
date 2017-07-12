@@ -37,8 +37,8 @@ It is recommended to close the numena connection when the activity stops
 byte[] publickey = ....
 byte[] secretkey = ....
 String TESTNAME = "test";
-String TESTORG = "testorg";
-String TESTAPPDATA = "testappdata";
+byte[] TESTORG = "testorg".getBytes();
+byte[] TESTAPPDATA = "testappdata".getBytes();
 numena.getMessageHandler().unregister(publickey, secretkey,TESTNAME , TESTORG, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
                         @Override
                         public void onCompletion(NumenaResponse result) {
