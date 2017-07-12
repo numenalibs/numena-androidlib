@@ -48,6 +48,10 @@ public class CallbackManager {
         return new StoreObjectCallback(numenaUsers, content, organisationId, appId, writePermission, readPermission, listener);
     }
 
+    public GetObjectCallback makeGetObjectCallback(byte[] publicKey, byte[] appId, byte[] messageHash, int limit, ResultsListener<NumenaResponse> listener){
+        return new GetObjectCallback(publicKey,appId,messageHash,limit,listener);
+    }
+
     /**
      * Method that executes the call for register.
      * Using NumenaMessageHelper to build and send a basemessage with type LEDGER
@@ -144,6 +148,27 @@ public class CallbackManager {
 
     private void executeStoreObjectCall(List<NumenaUser> numenaUsers, byte[] content, byte[] organisationId, byte[] appId, boolean writePermission, boolean readPermission, ResultsListener listener) {
         numenaMessageHelper.buildAndStoreObject(numenaUsers, content, organisationId, appId, writePermission, readPermission, listener);
+    }
+
+    /**
+     * * Method that executes the call for getObject
+     * Using NumenaMessageHelper to build and send a basemessage with type DATABASE
+     *
+     * @param publicKey
+     * @param appId
+     * @param messageHash
+     * @param limit
+     * @param clientlistener
+     */
+
+
+    private void executeGetObjectCall(byte[] publicKey, byte[] appId, byte[] messageHash, int limit, ResultsListener<NumenaResponse> clientlistener){
+        byte[] usedPubKey = publicKey;
+        if (publicKey == null) {
+            usedPubKey = ValuesManager.getInstance().getClientIdentityPublicKey();
+        }
+        numenaMessageHelper.buildAndGetObject(usedPubKey,appId,messageHash,limit,clientlistener);
+
     }
 
     /****************************************************************************************
@@ -252,6 +277,28 @@ public class CallbackManager {
         @Override
         public Void call() {
             executeContactCall(self, numenaUser, type, listener);
+            return null;
+        }
+    }
+
+    public class GetObjectCallback extends NumenaMethod {
+
+        private byte[] publickey, appId, messageHash;
+        private int limit;
+        private ResultsListener listener;
+
+
+        public GetObjectCallback(byte[] publickey, byte[] appId, byte[] messageHash, int limit, ResultsListener listener) {
+            this.publickey = publickey;
+            this.appId = appId;
+            this.messageHash = messageHash;
+            this.limit = limit;
+            this.listener = listener;
+        }
+
+        @Override
+        public Void call() {
+            executeGetObjectCall(publickey,appId,messageHash,limit,listener);
             return null;
         }
     }

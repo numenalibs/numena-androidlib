@@ -68,35 +68,20 @@ public class MainActivity extends AppCompatActivity {
         getUsersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    numena.getMessageHandler().getUsers(query.getText().toString(), new ResultsListener<NumenaResponse>() {
-                        @Override
-                        public void onCompletion(NumenaResponse result) {
-                        }
-                    });
+
 
             }
         });
-        List<NumenaUser> numenaUsers = new ArrayList<>();
-        byte[] content = null;
-        byte[] organisationId = null;
-        byte[] appId = null;
-        boolean writePermission = true;
-        boolean readPermission = true;
-
-        numena.getMessageHandler().storeObject(numenaUsers, content, organisationId, appId, writePermission, readPermission, new ResultsListener<NumenaResponse>() {
-            @Override
-            public void onCompletion(NumenaResponse result) {
-
-            }
-        });
-
-
 
         nextActButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, NextActivity.class);
-                startActivity(intent);
+                numena.getMessageHandler().getObject(null, "test".getBytes(), "o".getBytes(), 5, new ResultsListener<NumenaResponse>() {
+                    @Override
+                    public void onCompletion(NumenaResponse result) {
+                        Log.d("STATUS", result.getStatus());
+                    }
+                });
             }
         });
     }

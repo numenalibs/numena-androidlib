@@ -21,8 +21,10 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
+import messages.Basemessage;
 import messages.Basemessage.BaseMessage;
 import messages.Clienthello.ClientHello;
+import messages.Databaseinterface;
 import messages.Databaseinterface.DatabaseInterface;
 import messages.Ledgerinterface.LedgerInterface;
 import messages.Databaseinterface.DatabaseInterface;
@@ -380,4 +382,28 @@ public class ProtocolManager {
         }
     }
 
+    public BaseMessage getObject(byte[] own_id_pkey, byte[] appId, byte[] message_hash, int limit) {
+        DatabaseInterface.GetObject.Builder get_obj_builder = Databaseinterface.DatabaseInterface.GetObject.newBuilder();
+        // GetObject
+        get_obj_builder.setKey(ByteString.copyFrom(own_id_pkey));
+        get_obj_builder.setAppId(ByteString.copyFrom(appId));
+        get_obj_builder.setMessageHash(ByteString.copyFrom(message_hash));
+        get_obj_builder.setLimit(limit);
+
+        Databaseinterface.DatabaseInterface.GetObject get_obj = get_obj_builder.build();
+
+        // DatabaseInterface
+        Databaseinterface.DatabaseInterface.Builder database_interface_builder = Databaseinterface.DatabaseInterface.newBuilder();
+        database_interface_builder.setType(Databaseinterface.DatabaseInterface.Type.GET);
+        database_interface_builder.setGetObject(get_obj);
+        Databaseinterface.DatabaseInterface database_interface = database_interface_builder.build();
+
+        // BaseMessage
+        Basemessage.BaseMessage.Builder base_msg_builder = Basemessage.BaseMessage.newBuilder();
+        base_msg_builder.setType(Basemessage.BaseMessage.Type.DATABASE);
+        base_msg_builder.setDatabase(database_interface);
+        Basemessage.BaseMessage base_msg = base_msg_builder.build();
+
+        return base_msg;
+    }
 }

@@ -95,6 +95,23 @@ public class NumenaMessageHandler {
     }
 
     /**
+     * Method for adding a getObjectCallback to the queue
+     *  If Publickey is nulled the first forged identitykey is used
+     * @param publicKey
+     * @param appId
+     * @param messageHash
+     * @param limit
+     * @param clientlistener
+     */
+
+    public void getObject(@Nullable  byte[] publicKey, byte[] appId, byte[] messageHash, int limit, ResultsListener<NumenaResponse> clientlistener){
+        CallbackManager.GetObjectCallback getObjectCallback = callbackManager.makeGetObjectCallback(publicKey,appId,messageHash,limit, clientlistener);
+        forExecute.add(getObjectCallback);
+        BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
+    }
+
+
+    /**
      * Method for adding a storeObjectCallback to the queue
      * @param numenaUsers
      * @param content

@@ -291,6 +291,13 @@ public class NumenaMessageHelper {
         sendBaseMessage(baseMessage);
     }
 
+    public void buildAndGetObject(byte[] publicKey, byte[] appId, byte[] messageHash, int limit, ResultsListener<NumenaResponse> clientlistener){
+        BaseMessage baseMessage = protocolManager.getObject(publicKey,appId,messageHash,limit);
+        final ResultsListener listener = createNewListener(clientlistener);
+        singleMessageManager.setListener(listener);
+        sendBaseMessage(baseMessage);
+    }
+
     /**
      * Builds a basemessage containing a ledgerinterface with type UNREGISTER
      * and sends it
