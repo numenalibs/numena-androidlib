@@ -46,6 +46,11 @@ public class NumenaMessageHelper {
         STATE = Constants.EXPECTING_SERVERHELLO;
     }
 
+    public NumenaMessageHelper(ProtocolManager protocolManager, EncryptionManager encryptionManager){
+        this.protocolManager = protocolManager;
+        this.encryptionManager = encryptionManager;
+    }
+
     public void closeConnection(){
         STATE = Constants.EXPECTING_SERVERHELLO;
         initiatingCall = true;
