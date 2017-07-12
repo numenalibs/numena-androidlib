@@ -56,26 +56,24 @@ public class MainActivity extends AppCompatActivity {
         unregButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                numena.getMessageHandler().unregister(null, null, username.getText().toString(), TESTORG, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
-                    @Override
-                    public void onCompletion(NumenaResponse result) {
-                        Log.d("UNREGISTER UI1", result.getStatus());
-                    }
-                });
+                    numena.getMessageHandler().unregister(null, null, username.getText().toString(), TESTORG, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
+                        @Override
+                        public void onCompletion(NumenaResponse result) {
+                            Log.d("UNREGISTER UI1", result.getStatus());
+                        }
+                    });
+
             }
         });
 
         getUsersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for(int i = 0 ; i < 10 ; i++) {
                     numena.getMessageHandler().getUsers(query.getText().toString(), new ResultsListener<NumenaResponse>() {
                         @Override
                         public void onCompletion(NumenaResponse result) {
-                            Log.d("STATUS IS ", result.getStatus());
                         }
                     });
-                }
             }
         });
 

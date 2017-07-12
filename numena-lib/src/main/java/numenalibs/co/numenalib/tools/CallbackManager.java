@@ -168,16 +168,7 @@ public class CallbackManager {
 
         @Override
         public Void call() {
-            if (numenaMessageHelper.isConnectionEstablished()) {
-                executeRegisterCall(publicKey, secretKey, title, organisationId, appData, listener);
-            } else {
-                numenaMessageHelper.initConnection(new ResultsListener<NumenaResponse>() {
-                    @Override
-                    public void onCompletion(NumenaResponse result) {
-                        executeRegisterCall(publicKey, secretKey, title, organisationId, appData, listener);
-                    }
-                });
-            }
+            executeRegisterCall(publicKey, secretKey, title, organisationId, appData, listener);
             return null;
         }
     }
@@ -199,17 +190,7 @@ public class CallbackManager {
 
         @Override
         public Void call() {
-            if (numenaMessageHelper.isConnectionEstablished()) {
-                executeUnregisterCall(publicKey, secretKey, title, organisationId, appData, listener);
-            } else {
-                numenaMessageHelper.initConnection(new ResultsListener<NumenaResponse>() {
-                    @Override
-                    public void onCompletion(NumenaResponse result) {
-                        executeUnregisterCall(publicKey, secretKey, title, organisationId, appData, listener);
-
-                    }
-                });
-            }
+            executeUnregisterCall(publicKey, secretKey, title, organisationId, appData, listener);
             return null;
         }
     }
@@ -226,16 +207,7 @@ public class CallbackManager {
 
         @Override
         public Void call() {
-            if (numenaMessageHelper.isConnectionEstablished()) {
-                executeGetUsersCall(query, listener);
-            } else {
-                numenaMessageHelper.initConnection(new ResultsListener<NumenaResponse>() {
-                    @Override
-                    public void onCompletion(NumenaResponse result) {
-                        executeGetUsersCall(query, listener);
-                    }
-                });
-            }
+            executeGetUsersCall(query, listener);
             return null;
         }
     }
@@ -259,16 +231,7 @@ public class CallbackManager {
 
         @Override
         public Void call() {
-            if (numenaMessageHelper.isConnectionEstablished()) {
-                executeStoreObjectCall(numenaUserList, content, organisationId, appId, writePermission, readPermission, listener);
-            } else {
-                numenaMessageHelper.initConnection(new ResultsListener<NumenaResponse>() {
-                    @Override
-                    public void onCompletion(NumenaResponse result) {
-                        executeStoreObjectCall(numenaUserList, content, organisationId, appId, writePermission, readPermission, listener);
-                    }
-                });
-            }
+            executeStoreObjectCall(numenaUserList, content, organisationId, appId, writePermission, readPermission, listener);
             return null;
         }
     }
@@ -288,16 +251,7 @@ public class CallbackManager {
 
         @Override
         public Void call() {
-            if (numenaMessageHelper.isConnectionEstablished()) {
-                executeContactCall(self, numenaUser, type, listener);
-            } else {
-                numenaMessageHelper.initConnection(new ResultsListener<NumenaResponse>() {
-                    @Override
-                    public void onCompletion(NumenaResponse result) {
-                        executeContactCall(self, numenaUser, type, listener);
-                    }
-                });
-            }
+            executeContactCall(self, numenaUser, type, listener);
             return null;
         }
     }

@@ -56,9 +56,18 @@ public class NumenaMessageHandler {
                     NumenaMethod method = forExecute.poll();
                     if (method != null) {
                         isLocked = true;
-                        WorkerThread workerThread = new WorkerThread();
+                        final WorkerThread workerThread = new WorkerThread();
                         workerThread.setNumenaMethod(method);
-                        workerThread.start();
+                        if(!singleMessageManager.isWebsocketConnected()){
+                            numenaMessageHelper.initConnection(new ResultsListener<NumenaResponse>() {
+                                @Override
+                                public void onCompletion(NumenaResponse result) {
+                                    workerThread.start();
+                                }
+                            });
+                        }else {
+                            workerThread.start();
+                        }
                     }
                 }
             }
