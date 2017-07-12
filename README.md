@@ -21,6 +21,16 @@ minSdkVersion 18
 ```java
 Numena numena = Numena.getInstance();
 ```
+
+It is recommended to close the numena connection when the activity stops
+```java
+ @Override
+    protected void onStop() {
+        super.onStop();
+        numena.getMessageHandler().closeSocket();
+    }
+```
+
 #### Register a user
 
 ```java
@@ -94,7 +104,7 @@ public class NumenaResponse {
 
 ### Installing
 
-Gradle
+#####Gradle
 Include dependency using Gradle
 
 ```java
