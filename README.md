@@ -104,7 +104,6 @@ public class NumenaResponse {
 
 ### Installing
 
-
 Include dependency using Gradle
 
 ```java
