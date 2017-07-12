@@ -31,10 +31,14 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     public static ValuesManager getInstance(){
         if(instance == null){
             instance = new ValuesManager();
-            instance.setLocalNonce(0);
-            instance.setRemoteNonce(1);
+            instance.resetNonces();
         }
         return instance;
+    }
+
+    public void resetNonces(){
+        instance.setLocalNonce(0);
+        instance.setRemoteNonce(1);
     }
 
     public void initDatabase(Context context){

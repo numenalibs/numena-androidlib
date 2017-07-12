@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
                             Log.d("UNREGISTER UI1", result.getStatus());
                         }
                     });
-
             }
         });
 
@@ -74,6 +73,20 @@ public class MainActivity extends AppCompatActivity {
                         public void onCompletion(NumenaResponse result) {
                         }
                     });
+
+            }
+        });
+        List<NumenaUser> numenaUsers = new ArrayList<>();
+        byte[] content = null;
+        byte[] organisationId = null;
+        byte[] appId = null;
+        boolean writePermission = true;
+        boolean readPermission = true;
+
+        numena.getMessageHandler().storeObject(numenaUsers, content, organisationId, appId, writePermission, readPermission, new ResultsListener<NumenaResponse>() {
+            @Override
+            public void onCompletion(NumenaResponse result) {
+
             }
         });
 
@@ -86,5 +99,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        numena.getMessageHandler().closeSocket();
     }
 }

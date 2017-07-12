@@ -35,7 +35,6 @@ public class NumenaMessageHelper {
     private ProtocolManager protocolManager;
     private SingleMessageManager singleMessageManager;
     private static int STATE = 0;
-    public static boolean connectionEstablished = false;
     public static boolean isLocked = false;
     public boolean initiatingCall = true;
 
@@ -45,6 +44,13 @@ public class NumenaMessageHelper {
         this.protocolManager = protocolManager;
         this.singleMessageManager = singleMessageManager;
         STATE = Constants.EXPECTING_SERVERHELLO;
+    }
+
+    public void closeConnection(){
+        STATE = Constants.EXPECTING_SERVERHELLO;
+        initiatingCall = true;
+        ValuesManager.getInstance().resetNonces();
+        singleMessageManager.disconnectWebsocket();
     }
 
     /**
@@ -154,7 +160,6 @@ public class NumenaMessageHelper {
 
         long code = status.getStatusCode();
         if (code == 1) {
-            connectionEstablished = true;
             numenaResponse.setStatus(Constants.RESPONSE_SUCCESS);
         } else {
             numenaResponse.setStatus(Constants.RESPONSE_FAILURE);
@@ -379,10 +384,6 @@ public class NumenaMessageHelper {
 
     public boolean isConnectionEstablished() {
         return singleMessageManager.isWebsocketConnected();
-    }
-
-    public void setConnectionEstablished(boolean connectionEstablished) {
-        this.connectionEstablished = connectionEstablished;
     }
 
     /**

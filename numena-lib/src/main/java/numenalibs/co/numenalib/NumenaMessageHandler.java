@@ -58,7 +58,7 @@ public class NumenaMessageHandler {
                         isLocked = true;
                         final WorkerThread workerThread = new WorkerThread();
                         workerThread.setNumenaMethod(method);
-                        if(!singleMessageManager.isWebsocketConnected()){
+                        if(!numenaMessageHelper.isConnectionEstablished()){
                             numenaMessageHelper.initConnection(new ResultsListener<NumenaResponse>() {
                                 @Override
                                 public void onCompletion(NumenaResponse result) {
@@ -87,6 +87,11 @@ public class NumenaMessageHandler {
         ValuesManager valuesManager = ValuesManager.getInstance();
         valuesManager.initDatabase(context);
         encryptionManager.setupKeys();
+    }
+
+    public void closeSocket(){
+        numenaMessageHelper.closeConnection();
+
     }
 
     /**

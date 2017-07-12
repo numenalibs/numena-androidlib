@@ -24,6 +24,11 @@ public class SingleMessageManager {
         }
     }
 
+    public void disconnectWebsocket(){
+        if(webSocketConnection != null)
+        webSocketConnection.disconnect();
+    }
+
     public boolean isWebsocketConnected(){
         if(webSocketConnection == null){
             return false;
