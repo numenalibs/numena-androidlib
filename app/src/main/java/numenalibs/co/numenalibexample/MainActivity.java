@@ -15,6 +15,7 @@ import java.util.List;
 import numenalibs.co.numenalib.Numena;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
+import numenalibs.co.numenalib.models.NumenaChatHandler;
 import numenalibs.co.numenalib.models.NumenaObject;
 import numenalibs.co.numenalib.models.NumenaResponse;
 import numenalibs.co.numenalib.models.NumenaUser;
@@ -76,7 +77,14 @@ public class MainActivity extends AppCompatActivity {
         nextActButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                numena.getMessageHandler().subscribe(null, null, TESTORG, "Helium".getBytes(), new ResultsListener<NumenaResponse>() {
+                NumenaChatHandler k = new NumenaChatHandler() {
+                    @Override
+                    public void onMessage(byte[] msg) {
+                        Log.d("HELLO", "MESSAGE");
+                    }
+                };
+
+                numena.getMessageHandler().subscribe(null, null, TESTORG, "Helium".getBytes(),k, new ResultsListener<NumenaResponse>() {
                     @Override
                     public void onCompletion(NumenaResponse result) {
                         Log.d("SUBSCRIBE", result.getStatus());
@@ -84,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
+
+
     }
 
     @Override

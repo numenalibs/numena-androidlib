@@ -8,6 +8,7 @@ import java.util.List;
 
 import numenalibs.co.numenalib.NumenaMessageHelper;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
+import numenalibs.co.numenalib.models.NumenaChatHandler;
 import numenalibs.co.numenalib.models.NumenaMethod;
 import numenalibs.co.numenalib.models.NumenaResponse;
 import numenalibs.co.numenalib.models.NumenaUser;
@@ -52,8 +53,8 @@ public class CallbackManager {
         return new GetObjectCallback(publicKey,appId,messageHash,limit,listener);
     }
 
-    public SubscribeCallback makeSubscribeCallback(byte[] publicKey, byte[] secretKey, byte[] organisationId, byte[] appId, ResultsListener listener) {
-        return new SubscribeCallback(publicKey,secretKey,organisationId,appId,listener);
+    public SubscribeCallback makeSubscribeCallback(byte[] publicKey, byte[] secretKey, byte[] organisationId, byte[] appId, NumenaChatHandler chatHandler, ResultsListener listener) {
+        return new SubscribeCallback(publicKey,secretKey,organisationId,appId,chatHandler, listener);
     }
 
 
@@ -177,7 +178,7 @@ public class CallbackManager {
 
     }
 
-    private void executeSubscribeCall(byte[] identityPublicKey, byte[] identitySecretKey, byte[] organisationId, byte[] appId, ResultsListener<NumenaResponse> clientlistener) {
+    private void executeSubscribeCall(byte[] identityPublicKey, byte[] identitySecretKey, byte[] organisationId, byte[] appId,NumenaChatHandler chatHandler, ResultsListener<NumenaResponse> clientlistener) {
         ValuesManager valuesManager = ValuesManager.getInstance();
         byte[] usedPubKey = identityPublicKey;
         byte[] usedSecretKey = identitySecretKey;
@@ -187,7 +188,7 @@ public class CallbackManager {
         if (identitySecretKey == null) {
             usedSecretKey = valuesManager.getClientIdentitySecretKey();
         }
-        numenaMessageHelper.buildAndSendSubscribe(usedPubKey, usedSecretKey, organisationId, appId, clientlistener);
+        numenaMessageHelper.buildAndSendSubscribe(usedPubKey, usedSecretKey, organisationId, appId,chatHandler, clientlistener);
     }
 
     /****************************************************************************************
@@ -200,18 +201,20 @@ public class CallbackManager {
 
         byte[] publicKey, secretKey, organisationId, appId;
         private ResultsListener listener;
+        private NumenaChatHandler chatHandler;
 
-        public SubscribeCallback(byte[] publicKey, byte[] secretKey, byte[] organisationId, byte[] appId, ResultsListener listener) {
+        public SubscribeCallback(byte[] publicKey, byte[] secretKey, byte[] organisationId, byte[] appId,NumenaChatHandler numenaChatHandler, ResultsListener listener) {
             this.publicKey = publicKey;
             this.secretKey = secretKey;
             this.organisationId = organisationId;
             this.appId = appId;
             this.listener = listener;
+            this.chatHandler = numenaChatHandler;
         }
 
         @Override
         public Void call() {
-            executeSubscribeCall(publicKey,secretKey,organisationId,appId,listener);
+            executeSubscribeCall(publicKey,secretKey,organisationId,appId,chatHandler, listener);
             return null;
         }
     }

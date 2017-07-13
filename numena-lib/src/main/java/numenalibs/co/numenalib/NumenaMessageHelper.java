@@ -20,6 +20,7 @@ import messages.Statusmessage.StatusMessage;
 import numenalibs.co.numenalib.encryption.EncryptionManager;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
+import numenalibs.co.numenalib.models.NumenaChatHandler;
 import numenalibs.co.numenalib.models.NumenaMethod;
 import numenalibs.co.numenalib.models.NumenaObject;
 import numenalibs.co.numenalib.models.NumenaResponse;
@@ -39,6 +40,7 @@ public class NumenaMessageHelper {
     private static int STATE = 0;
     public static boolean isLocked = false;
     public boolean initiatingCall = true;
+    private NumenaChatHandler numenaChatHandler;
 
 
     public NumenaMessageHelper(EncryptionManager encryptionManager, ProtocolManager protocolManager, SingleMessageManager singleMessageManager) {
@@ -99,6 +101,9 @@ public class NumenaMessageHelper {
                         Log.d("TYPE IS", "SUBSCRIBE");
                         break;
                     case DATABASE:
+                        if(numenaChatHandler != null){
+                            numenaChatHandler.onMessage("LOL".getBytes());
+                        }
                         Log.d("TYPE IS", "DATABASE");
                         break;
                     case LEDGER:
@@ -202,7 +207,7 @@ public class NumenaMessageHelper {
      * *********************************************************************************
      */
 
-    public void buildAndSendSubscribe(byte[] identityPublicKey, byte[] identitySecretKey, byte[] organisationId, byte[] appId, ResultsListener<NumenaResponse> clientlistener) {
+    public void buildAndSendSubscribe(byte[] identityPublicKey, byte[] identitySecretKey, byte[] organisationId, byte[] appId, NumenaChatHandler chatHandler, ResultsListener<NumenaResponse> clientlistener) {
         Facademessages.Subscribe.Builder subBuilder = protocolManager.subscribeProtoBuilder(appId, organisationId, identityPublicKey);
         byte[] signature = null;
         try {
@@ -215,6 +220,7 @@ public class NumenaMessageHelper {
         final ResultsListener listener = createNewListener(clientlistener);
         singleMessageManager.setListener(listener);
         sendBaseMessage(baseMessage);
+        this.numenaChatHandler = chatHandler;
     }
 
 
