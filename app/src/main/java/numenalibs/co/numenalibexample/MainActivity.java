@@ -20,12 +20,14 @@ import numenalibs.co.numenalib.models.NumenaObject;
 import numenalibs.co.numenalib.models.NumenaResponse;
 import numenalibs.co.numenalib.models.NumenaUser;
 import numenalibs.co.numenalib.tools.Utils;
+import numenalibs.co.numenalib.tools.ValuesManager;
 
 public class MainActivity extends AppCompatActivity {
 
     private Numena numena;
     private static byte[] TESTORG = "LIBTESTman2".getBytes();
     private static byte[] TESTAPPDATA = "LIBTESTman2".getBytes();
+    private static byte[] TESTAPPID = "LIBTEST".getBytes();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +40,11 @@ public class MainActivity extends AppCompatActivity {
         Button unregButton = (Button) findViewById(R.id.unregisterButton);
         Button getUsersButton = (Button) findViewById(R.id.getUsersButton);
         Button nextActButton = (Button) findViewById(R.id.nextActivityButton);
+        Button storeToSelf = (Button) findViewById(R.id.storeSelfbutton);
 
         final EditText username = (EditText) findViewById(R.id.userNameEditText);
         final EditText query = (EditText) findViewById(R.id.getUsersEditText);
+        final EditText msgEditText = (EditText) findViewById(R.id.messageEditText);
 
         regButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,13 +78,36 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        storeToSelf.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<NumenaUser> numenaUsers = new ArrayList<>();
+                byte[] content = msgEditText.getText().toString().getBytes();
+                byte[] organisationId = TESTORG;
+                byte[] appId = TESTAPPID;
+                boolean writePermission = true;
+                boolean readPermission = true;
+                ValuesManager valuesManager = ValuesManager.getInstance();
+                byte[] publicKey = valuesManager.getClientIdentityPublicKey();
+                NumenaUser numenaUser = new NumenaUser(username.getText().toString(),TESTAPPDATA, publicKey,TESTORG);
+                numenaUsers.add(numenaUser);
+
+                numena.getMessageHandler().storeObject(numenaUsers, content, organisationId, appId, writePermission, readPermission, new ResultsListener<NumenaResponse>() {
+                    @Override
+                    public void onCompletion(NumenaResponse result) {
+                        Log.d("STORE", result.getStatus());
+                    }
+                });
+            }
+        });
+
         nextActButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 NumenaChatHandler k = new NumenaChatHandler() {
                     @Override
                     public void onMessage(byte[] msg) {
-                        Log.d("HELLO", "MESSAGE");
+                        Log.d("GOT A NEW MESSAGE", new String(msg));
                     }
                 };
 

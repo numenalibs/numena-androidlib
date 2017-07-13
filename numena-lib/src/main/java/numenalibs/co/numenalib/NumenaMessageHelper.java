@@ -92,6 +92,9 @@ public class NumenaMessageHelper {
                 BaseMessage basemessage = BaseMessage.parseFrom(decryptedMsg);
                 BaseMessage.Type msgtype = basemessage.getType();
                 NumenaResponse numenaResponse = new NumenaResponse();
+                boolean reportToListener = true;
+                boolean incrementLocalNonce = true;
+                boolean incremenetRemoteNonce = true;
                 switch (msgtype) {
                     case STATUS:
                         Log.d("TYPE IS", "STATUS");
@@ -101,9 +104,14 @@ public class NumenaMessageHelper {
                         Log.d("TYPE IS", "SUBSCRIBE");
                         break;
                     case DATABASE:
+                        numenaResponse.setStatus(Constants.RESPONSE_SUCCESS);
                         if(numenaChatHandler != null){
-                            numenaChatHandler.onMessage("LOL".getBytes());
+                            Databaseinterface.DatabaseInterface databaseInterface = basemessage.getDatabase();
+                            List<Databaseinterface.DatabaseInterface.DatabaseObject> objects = databaseInterface.getResponseList();
+                            Databaseinterface.DatabaseInterface.DatabaseObject object = objects.get(0);
+                            numenaChatHandler.onMessage(object.getEncryptedMessage().toByteArray());
                         }
+                        incrementLocalNonce = false;
                         Log.d("TYPE IS", "DATABASE");
                         break;
                     case LEDGER:
@@ -111,20 +119,21 @@ public class NumenaMessageHelper {
                         handleLedgerMessage(basemessage, numenaResponse);
                         break;
                     case ACK:
+                        reportToListener = false;
                         Log.d("TYPE IS", "ACK");
                         break;
                     default:
                         break;
                 }
 
-                incrementNonces();
+                incrementNonces(incrementLocalNonce,incremenetRemoteNonce);
                 isLocked = false;
                 if (!initiatingCall) {
                     BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
                 } else {
                     initiatingCall = false;
                 }
-                listener.onCompletion(numenaResponse);
+                if(reportToListener) listener.onCompletion(numenaResponse);
             }
         } catch (InvalidProtocolBufferException e) {
             throw new NumenaLibraryException("Failed: Could not parse decrypted message as Basemessage");
@@ -426,12 +435,12 @@ public class NumenaMessageHelper {
      * Incrementing nonce values, for both remote and local nonce
      */
 
-    private void incrementNonces() {
+    private void incrementNonces(boolean incrementLocalNonce, boolean incrementRemoteNonce) {
         ValuesManager valuesManager = ValuesManager.getInstance();
         int currentLocalNonce = valuesManager.getLocalNonce();
         int currentRemoteNonce = valuesManager.getRemoteNonce();
-        valuesManager.setLocalNonce(currentLocalNonce + 2);
-        valuesManager.setRemoteNonce(currentRemoteNonce + 2);
+        if(incrementLocalNonce) valuesManager.setLocalNonce(currentLocalNonce + 2);
+        if(incrementRemoteNonce) valuesManager.setRemoteNonce(currentRemoteNonce + 2);
     }
 
     /**

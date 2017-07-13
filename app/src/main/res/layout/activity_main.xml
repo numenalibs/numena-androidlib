@@ -52,11 +52,25 @@
         android:text="GETUSERS" />
 
 
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="INSERT MESSAGE"
+        android:id="@+id/messageEditText"
+        />
+
+    <Button
+        android:id="@+id/storeSelfbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="STORE TO SELF" />
+
     <Button
         android:id="@+id/nextActivityButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="NEXT ACTIVITY" />
+        android:text="SUBSCRIBE" />
 
 
 

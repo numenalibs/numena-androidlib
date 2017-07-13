@@ -36,6 +36,7 @@ import messages.Serverhello.ServerHello.Handshake;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.models.NumenaUser;
 import numenalibs.co.numenalib.tools.Constants;
+import numenalibs.co.numenalib.tools.Utils;
 import numenalibs.co.numenalib.tools.ValuesManager;
 
 import static org.libsodium.jni.Sodium.crypto_box_easy;
@@ -324,6 +325,7 @@ public class ProtocolManager {
         for (int i = 0; i < users.size(); i++) {
             NumenaUser tempUser = users.get(i);
             byte[] publickKey = tempUser.getPublicKey();
+            Log.d("VERIFIER", Utils.printByteArray(publickKey));
             String userName = tempUser.getUsername();
 
             Capability.Builder capability_builder = Capability.newBuilder();
