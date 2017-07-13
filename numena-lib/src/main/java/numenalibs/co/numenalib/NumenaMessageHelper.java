@@ -8,9 +8,11 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.ArrayList;
 import java.util.List;
 
+import messages.Basemessage;
 import messages.Basemessage.BaseMessage;
 import messages.Clienthello.ClientHello;
 import messages.Databaseinterface;
+import messages.Facademessages;
 import messages.Ledgerinterface;
 import messages.Ledgerinterface.LedgerInterface;
 import messages.Serverhello.ServerHello;
@@ -199,6 +201,22 @@ public class NumenaMessageHelper {
      * METHODS FOR BUILDING MESSAGES
      * *********************************************************************************
      */
+
+    public void buildAndSendSubscribe(byte[] identityPublicKey, byte[] identitySecretKey, byte[] organisationId, byte[] appId, ResultsListener<NumenaResponse> clientlistener) {
+        Facademessages.Subscribe.Builder subBuilder = protocolManager.subscribeProtoBuilder(appId, organisationId, identityPublicKey);
+        byte[] signature = null;
+        try {
+            signature = encryptionManager.signMessage(appId, identitySecretKey);
+        } catch (NumenaLibraryException e) {
+            e.printStackTrace();
+        }
+        Facademessages.Subscribe sub = protocolManager.setSignatureOnSubscribe(subBuilder, signature);
+        Basemessage.BaseMessage baseMessage = protocolManager.subscribe(sub);
+        final ResultsListener listener = createNewListener(clientlistener);
+        singleMessageManager.setListener(listener);
+        sendBaseMessage(baseMessage);
+    }
+
 
     /**
      * Builds a serverhello from the bytearray msg gotten when connection is established

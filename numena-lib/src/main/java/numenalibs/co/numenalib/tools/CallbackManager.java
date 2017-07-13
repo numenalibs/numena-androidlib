@@ -52,6 +52,12 @@ public class CallbackManager {
         return new GetObjectCallback(publicKey,appId,messageHash,limit,listener);
     }
 
+    public SubscribeCallback makeSubscribeCallback(byte[] publicKey, byte[] secretKey, byte[] organisationId, byte[] appId, ResultsListener listener) {
+        return new SubscribeCallback(publicKey,secretKey,organisationId,appId,listener);
+    }
+
+
+
     /**
      * Method that executes the call for register.
      * Using NumenaMessageHelper to build and send a basemessage with type LEDGER
@@ -171,10 +177,44 @@ public class CallbackManager {
 
     }
 
+    private void executeSubscribeCall(byte[] identityPublicKey, byte[] identitySecretKey, byte[] organisationId, byte[] appId, ResultsListener<NumenaResponse> clientlistener) {
+        ValuesManager valuesManager = ValuesManager.getInstance();
+        byte[] usedPubKey = identityPublicKey;
+        byte[] usedSecretKey = identitySecretKey;
+        if (identityPublicKey == null) {
+            usedPubKey = valuesManager.getClientIdentityPublicKey();
+        }
+        if (identitySecretKey == null) {
+            usedSecretKey = valuesManager.getClientIdentitySecretKey();
+        }
+        numenaMessageHelper.buildAndSendSubscribe(usedPubKey, usedSecretKey, organisationId, appId, clientlistener);
+    }
+
     /****************************************************************************************
      * CALLBACKS
      * **************************************************************************************
      */
+
+
+    public class SubscribeCallback extends NumenaMethod {
+
+        byte[] publicKey, secretKey, organisationId, appId;
+        private ResultsListener listener;
+
+        public SubscribeCallback(byte[] publicKey, byte[] secretKey, byte[] organisationId, byte[] appId, ResultsListener listener) {
+            this.publicKey = publicKey;
+            this.secretKey = secretKey;
+            this.organisationId = organisationId;
+            this.appId = appId;
+            this.listener = listener;
+        }
+
+        @Override
+        public Void call() {
+            executeSubscribeCall(publicKey,secretKey,organisationId,appId,listener);
+            return null;
+        }
+    }
 
     public class RegisterCallback extends NumenaMethod {
 

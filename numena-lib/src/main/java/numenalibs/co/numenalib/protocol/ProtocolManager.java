@@ -26,6 +26,7 @@ import messages.Basemessage.BaseMessage;
 import messages.Clienthello.ClientHello;
 import messages.Databaseinterface;
 import messages.Databaseinterface.DatabaseInterface;
+import messages.Facademessages;
 import messages.Ledgerinterface.LedgerInterface;
 import messages.Databaseinterface.DatabaseInterface;
 import messages.Databaseinterface.DatabaseInterface.DatabaseObject;
@@ -406,4 +407,43 @@ public class ProtocolManager {
 
         return base_msg;
     }
+
+    /**
+     * Used for generating a Subscribe builder containing appid, organization and publickey
+     * @param appId
+     * @param organization
+     * @param publicKey
+     * @return
+     */
+
+    public Facademessages.Subscribe.Builder subscribeProtoBuilder(byte[] appId, byte[] organization, byte[] publicKey) {
+        Facademessages.Subscribe.Builder subBuilder = Facademessages.Subscribe.newBuilder();
+        subBuilder.setAppId(ByteString.copyFrom(appId));
+        subBuilder.setOrgId(ByteString.copyFrom(organization));
+        subBuilder.setQueue(ByteString.copyFrom(publicKey));
+        subBuilder.setSignedMsg(ByteString.copyFrom(appId));
+        return subBuilder;
+    }
+
+    public Facademessages.Subscribe setSignatureOnSubscribe(Facademessages.Subscribe.Builder subBuilder, byte[] signature) {
+        subBuilder.setMsgSignature(ByteString.copyFrom(signature));
+        return subBuilder.build();
+    }
+
+    /**
+     * Used for generating a basemessage containing a FacadeMessage.Subscribe with type SUBSCRIBE
+     * @param sub
+     * @return
+     */
+
+    public Basemessage.BaseMessage subscribe(Facademessages.Subscribe sub) {
+        Basemessage.BaseMessage.Builder baseBuilder = Basemessage.BaseMessage.newBuilder();
+        baseBuilder.setType(Basemessage.BaseMessage.Type.SUBSCRIBE);
+        baseBuilder.setSubscribe(sub);
+        Basemessage.BaseMessage baseMessage = baseBuilder.build();
+        return baseMessage;
+    }
+
+
+
 }

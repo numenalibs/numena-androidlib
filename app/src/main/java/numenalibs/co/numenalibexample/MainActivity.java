@@ -76,10 +76,10 @@ public class MainActivity extends AppCompatActivity {
         nextActButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                numena.getMessageHandler().getObject(null, "test".getBytes(), "o".getBytes(), 5, new ResultsListener<NumenaResponse>() {
+                numena.getMessageHandler().subscribe(null, null, TESTORG, "Helium".getBytes(), new ResultsListener<NumenaResponse>() {
                     @Override
                     public void onCompletion(NumenaResponse result) {
-                        Log.d("STATUS", result.getStatus());
+                        Log.d("SUBSCRIBE", result.getStatus());
                     }
                 });
             }

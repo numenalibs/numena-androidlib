@@ -94,6 +94,23 @@ public class NumenaMessageHandler {
 
     }
 
+
+    /**
+     * Method for adding a subscribe callback to the queue
+     * If Public- and secretkey is nulled the first forged identitykeys are used
+     * @param identityPublicKey
+     * @param identitySecretKey
+     * @param organisationId
+     * @param appId
+     * @param clientlistener
+     */
+
+    public void subscribe(@Nullable byte[] identityPublicKey, @Nullable byte[] identitySecretKey, byte[] organisationId, byte[] appId, ResultsListener<NumenaResponse> clientlistener){
+        CallbackManager.SubscribeCallback subscribeCallback = callbackManager.makeSubscribeCallback(identityPublicKey,identitySecretKey,organisationId,appId,clientlistener);
+        forExecute.add(subscribeCallback);
+        BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
+    }
+
     /**
      * Method for adding a getObjectCallback to the queue
      *  If Publickey is nulled the first forged identitykey is used
