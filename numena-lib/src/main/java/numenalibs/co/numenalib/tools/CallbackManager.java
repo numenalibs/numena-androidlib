@@ -37,8 +37,8 @@ public class CallbackManager {
         return new UnRegisterCallback(publicKey, secretKey, title, organisationId, appData, listener);
     }
 
-    public GetUsersCallback makeGetUsersCallback(String query, ResultsListener<NumenaResponse> listener) {
-        return new GetUsersCallback(query, listener);
+    public GetUsersCallback makeGetUsersCallback(String query, byte[] organisationId, ResultsListener<NumenaResponse> listener) {
+        return new GetUsersCallback(query,organisationId, listener);
     }
 
     public ContactCallback makeContactsCallback(NumenaUser self, NumenaUser contact, int type, ResultsListener<NumenaResponse> listener) {
@@ -136,8 +136,8 @@ public class CallbackManager {
      * @param listener
      */
 
-    private void executeGetUsersCall(final String query, ResultsListener<NumenaResponse> listener) {
-        numenaMessageHelper.buildAndSendGetUsers(query, listener);
+    private void executeGetUsersCall(final String query,byte[] organisationId, ResultsListener<NumenaResponse> listener) {
+        numenaMessageHelper.buildAndSendGetUsers(query,organisationId, listener);
     }
 
     /**
@@ -267,15 +267,17 @@ public class CallbackManager {
 
         private String query;
         private ResultsListener listener;
+        private byte[] organisationId;
 
-        public GetUsersCallback(String query, ResultsListener listener) {
+        public GetUsersCallback(String query,byte[] organisationId, ResultsListener listener) {
             this.query = query;
             this.listener = listener;
+            this.organisationId = organisationId;
         }
 
         @Override
         public Void call() {
-            executeGetUsersCall(query, listener);
+            executeGetUsersCall(query,organisationId, listener);
             return null;
         }
     }

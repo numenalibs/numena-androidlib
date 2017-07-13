@@ -402,9 +402,8 @@ public class NumenaMessageHelper {
      * @param clientlistener
      */
 
-    public void buildAndSendGetUsers(String query, ResultsListener<NumenaResponse> clientlistener) {
-        ValuesManager valuesManager = ValuesManager.getInstance();
-        BaseMessage baseMessage = protocolManager.getUsers(query, valuesManager.getOrganisationId());
+    public void buildAndSendGetUsers(String query, byte[] organisationId, ResultsListener<NumenaResponse> clientlistener) {
+        BaseMessage baseMessage = protocolManager.getUsers(query, organisationId);
         ResultsListener listener = createNewListener(clientlistener);
         singleMessageManager.setListener(listener);
         sendBaseMessage(baseMessage);

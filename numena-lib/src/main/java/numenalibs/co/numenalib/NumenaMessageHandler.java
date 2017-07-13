@@ -181,8 +181,8 @@ public class NumenaMessageHandler {
      * @param listener
      */
 
-    public void getUsers(final String query, final ResultsListener<NumenaResponse> listener) {
-        CallbackManager.GetUsersCallback getUsersCallback = callbackManager.makeGetUsersCallback(query, listener);
+    public void getUsers(final String query,byte[] organisationId, final ResultsListener<NumenaResponse> listener) {
+        CallbackManager.GetUsersCallback getUsersCallback = callbackManager.makeGetUsersCallback(query,organisationId, listener);
         forExecute.add(getUsersCallback);
         BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
     }
