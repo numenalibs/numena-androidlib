@@ -112,6 +112,7 @@ public class NumenaMessageHelper {
                             numenaChatHandler.onMessage(object.getEncryptedMessage().toByteArray());
                         }
                         incrementLocalNonce = false;
+                        reportToListener = false;
                         Log.d("TYPE IS", "DATABASE");
                         break;
                     case LEDGER:

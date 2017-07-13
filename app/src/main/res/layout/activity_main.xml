@@ -5,73 +5,91 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="numenalibs.co.numenalibexample.MainActivity">
+>
 
-    <EditText
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></ScrollView>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="INSERT USER NAME"
-        android:id="@+id/userNameEditText"
-        />
+        android:orientation="vertical">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-       >
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/userName"
+            android:hint="ENTER NAME"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Register"
+                android:id="@+id/registerButton"/>
+
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Unregister"
+                android:id="@+id/unregisterButton"/>
+
+
+        </LinearLayout>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/queryText"
+            android:hint="ENTER QUERY"/>
 
         <Button
-            android:id="@+id/registerButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:text="REGISTER" />
+            android:text="Query Users"
+            android:id="@+id/getUsersButton"/>
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:id="@+id/numenaUserListView"></ListView>
 
         <Button
-            android:id="@+id/unregisterButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_alignParentEnd="true"
-            android:text="UNREGISTER" />
+            android:text="SUBSCRIBE"
+            android:id="@+id/subscribeButton"/>
 
 
-    </RelativeLayout>
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/storeMessage"
+            android:hint="ENTER MESSAGE"/>
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="INSERT QUERY"
-        android:id="@+id/getUsersEditText"
-        />
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Send Message User"
+            android:id="@+id/sendMessageButton"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textMessage"
+            android:text="NO MESSAGE"
+            android:textSize="18sp"
+            android:gravity="center"/>
 
-    <Button
-        android:id="@+id/getUsersButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="GETUSERS" />
-
-
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="INSERT MESSAGE"
-        android:id="@+id/messageEditText"
-        />
-
-    <Button
-        android:id="@+id/storeSelfbutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="STORE TO SELF" />
-
-    <Button
-        android:id="@+id/nextActivityButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="SUBSCRIBE" />
-
+    </LinearLayout>
 
 
 </LinearLayout>
