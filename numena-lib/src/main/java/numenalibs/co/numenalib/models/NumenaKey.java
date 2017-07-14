@@ -18,6 +18,12 @@ public class NumenaKey {
         this.keyValue = Arrays.copyOf(keyValue,keyValue.length);
     }
 
+    public NumenaKey(String keyName, String keyHash, byte[] keyValue) {
+        this.keyName = keyName;
+        this.keyHash = keyHash;
+        this.keyValue = Arrays.copyOf(keyValue,keyValue.length);
+    }
+
     public String getId() {
         return id;
     }

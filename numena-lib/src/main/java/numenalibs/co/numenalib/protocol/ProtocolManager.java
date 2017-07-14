@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
+import messages.Appmessage;
 import messages.Basemessage;
 import messages.Basemessage.BaseMessage;
 import messages.Clienthello.ClientHello;
@@ -445,6 +446,16 @@ public class ProtocolManager {
         Basemessage.BaseMessage baseMessage = baseBuilder.build();
         return baseMessage;
     }
+
+    public Appmessage.AppMessage appMessage(byte[] encryptedContent, byte[] signature, byte[] appPKey) {
+        Appmessage.AppMessage.Builder appmsg_builder = Appmessage.AppMessage.newBuilder();
+        appmsg_builder.setContent(ByteString.copyFrom(encryptedContent));
+        appmsg_builder.setSignature(ByteString.copyFrom(signature));
+        appmsg_builder.setTemppublicKey(ByteString.copyFrom(appPKey));
+        Appmessage.AppMessage appmsg = appmsg_builder.build();
+        return appmsg;
+    }
+
 
 
 

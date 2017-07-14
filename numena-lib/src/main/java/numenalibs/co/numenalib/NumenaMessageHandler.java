@@ -81,10 +81,10 @@ public class NumenaMessageHandler {
         protocolManager = new ProtocolManager();
         encryptionManager = new EncryptionManager();
         singleMessageManager = new SingleMessageManager();
-        numenaCryptoBox = new NumenaCryptoBox(encryptionManager);
         BroadCaster.getBroadCaster().registerObserver(mHandler);
         numenaMessageHelper = new NumenaMessageHelper(encryptionManager, protocolManager, singleMessageManager);
         callbackManager = new CallbackManager(numenaMessageHelper);
+        numenaCryptoBox = new NumenaCryptoBox(encryptionManager,protocolManager);
     }
 
     public NumenaCryptoBox getNumenaCryptoBox(){
