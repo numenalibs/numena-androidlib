@@ -4711,7 +4711,7 @@ public final class Ledgerinterface {
           internal_static_messages_LedgerInterface_User_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_messages_LedgerInterface_User_descriptor,
-              new java.lang.String[] { "Username", "Key", "Organization", "AppData", });
+              new java.lang.String[] { "Username", "NumenaKey", "Organization", "AppData", });
           internal_static_messages_LedgerInterface_UserEvent_descriptor =
             internal_static_messages_LedgerInterface_descriptor.getNestedTypes().get(1);
           internal_static_messages_LedgerInterface_UserEvent_fieldAccessorTable = new

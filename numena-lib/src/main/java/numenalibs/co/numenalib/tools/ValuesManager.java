@@ -13,7 +13,7 @@ import java.util.List;
 import numenalibs.co.numenalib.database.DatabaseHelper;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.interfaces.NumenaCommunicatorInterface;
-import numenalibs.co.numenalib.models.Key;
+import numenalibs.co.numenalib.models.NumenaKey;
 
 public class ValuesManager implements NumenaCommunicatorInterface {
 
@@ -46,8 +46,8 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     }
 
     public void refreshKeysFromDatabase(){
-        List<Key> keys = databaseHelper.getAllKeys();
-        for(Key key : keys){
+        List<NumenaKey> keys = databaseHelper.getAllKeys();
+        for(NumenaKey key : keys){
             this.keys.put(key.getKeyName(),key.getKeyValue());
         }
     }

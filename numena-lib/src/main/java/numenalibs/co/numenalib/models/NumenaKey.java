@@ -2,16 +2,20 @@ package numenalibs.co.numenalib.models;
 
 import java.util.Arrays;
 
-public class Key {
+public class NumenaKey {
 
     String id, keyName, keyHash;
     byte[] keyValue;
 
-    public Key(String id, String keyName, String keyHash, byte[] keyValue) {
+    public NumenaKey(byte[] keyValue){
+        this.keyValue = Arrays.copyOf(keyValue,keyValue.length);
+    }
+
+    public NumenaKey(String id, String keyName, String keyHash, byte[] keyValue) {
         this.id = id;
         this.keyName = keyName;
         this.keyHash = keyHash;
-        this.keyValue = keyValue;
+        this.keyValue = Arrays.copyOf(keyValue,keyValue.length);
     }
 
     public String getId() {

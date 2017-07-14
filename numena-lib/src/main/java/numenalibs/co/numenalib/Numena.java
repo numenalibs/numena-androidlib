@@ -4,7 +4,6 @@ package numenalibs.co.numenalib;
 import android.content.Context;
 
 import de.tavendo.autobahn.WebSocketConnection;
-import numenalibs.co.numenalib.networking.NumenaChatSocket;
 import numenalibs.co.numenalib.tools.ValuesManager;
 
 public class Numena {
@@ -35,14 +34,5 @@ public class Numena {
     public void setMessageHandler(NumenaMessageHandler messageHandler) {
         this.messageHandler = messageHandler;
     }
-
-    public NumenaChatSocket getChatSocketHandler(WebSocketConnection webSocketConnection) {
-        return new NumenaChatSocket(webSocketConnection);
-    }
-
-    public WebSocketConnection getChatSocket(){
-        return new WebSocketConnection();
-    }
-
 
 }

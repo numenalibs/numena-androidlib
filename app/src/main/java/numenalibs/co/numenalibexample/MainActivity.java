@@ -26,6 +26,7 @@ import numenalibs.co.numenalib.Numena;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
 import numenalibs.co.numenalib.models.NumenaChatHandler;
+import numenalibs.co.numenalib.models.NumenaCryptoBox;
 import numenalibs.co.numenalib.models.NumenaObject;
 import numenalibs.co.numenalib.models.NumenaResponse;
 import numenalibs.co.numenalib.models.NumenaUser;
@@ -163,6 +164,8 @@ public class MainActivity extends AppCompatActivity {
         final NumenaChatHandler handler = new NumenaChatHandler() {
             @Override
             public void onMessage(byte[] bytes) {
+                NumenaCryptoBox cryptoBox = numena.getMessageHandler().getNumenaCryptoBox();
+
                 textMessage.setText(new String(bytes));
             }
         };

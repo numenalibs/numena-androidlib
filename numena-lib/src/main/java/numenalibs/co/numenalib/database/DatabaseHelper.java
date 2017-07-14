@@ -4,17 +4,14 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import numenalibs.co.numenalib.NumenaLibDebug;
-import numenalibs.co.numenalib.models.Key;
+import numenalibs.co.numenalib.models.NumenaKey;
 import numenalibs.co.numenalib.tools.Constants;
-import numenalibs.co.numenalib.tools.Utils;
 
 
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -61,9 +58,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return c.getCount() >= 2;
     }
 
-    public List<Key> getAllKeys() {
+    public List<NumenaKey> getAllKeys() {
         SQLiteDatabase db = this.getWritableDatabase();
-        List<Key> keys = new ArrayList<>();
+        List<NumenaKey> keys = new ArrayList<>();
         Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + ";", null);
         if (c.moveToFirst()) {
             do {
@@ -72,7 +69,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String keyName = c.getString(1);
                 byte[] keyValue = c.getBlob(2);
                 String keyHash = c.getString(3);
-                keys.add(new Key(id, keyName, keyHash, keyValue));
+                keys.add(new NumenaKey(id, keyName, keyHash, keyValue));
             } while (c.moveToNext());
         }
         db.close();

@@ -143,6 +143,41 @@ public class EncryptionManager {
         return ciphertext;
     }
 
+    public byte[] encryptAppMessage(byte[] MESSAGE, int MESSAGE_LEN, int nonceCounter, byte[] publickey, byte[] secretkey) throws NumenaLibraryException {
+        int CIPHERTEXT_LEN = Constants.CRYPTO_BOX_MACBYTES + MESSAGE_LEN;
+        byte[] ciphertext = new byte[CIPHERTEXT_LEN];
+        byte[] nonce;
+        nonce = Utils.createNonceArray(nonceCounter);
+
+        if (crypto_box_easy(
+                ciphertext,
+                MESSAGE,
+                MESSAGE_LEN,
+                nonce,
+                publickey,
+                secretkey) != 0) {
+            throw new NumenaLibraryException("Failing: APPMESSAGE ENCRYPTION FAIL");
+        }
+        return ciphertext;
+    }
+
+    public byte[] decrypt_appMessage(byte[] CIPHERTEXT, byte[] publickey, byte[] secretKey) throws NumenaLibraryException {
+        byte[] decrypted = new byte[CIPHERTEXT.length - Constants.CRYPTO_BOX_MACBYTES];
+        byte[] nonce;
+        nonce = Utils.createNonceArray(0);
+        if(crypto_box_open_easy(
+                decrypted,
+                CIPHERTEXT,
+                CIPHERTEXT.length,
+                nonce,
+                publickey,
+                secretKey) != 0) {
+            throw new NumenaLibraryException("Failing: APPMESSAGE DECRYPTION FAIL");
+        }
+
+        return decrypted;
+    }
+
     public byte[] encryptMessage(byte[] MESSAGE, int MESSAGE_LEN, int nonceCounter) throws NumenaLibraryException {
         int CIPHERTEXT_LEN = Constants.CRYPTO_BOX_MACBYTES + MESSAGE_LEN;
         ValuesManager valuesManager = ValuesManager.getInstance();
@@ -157,7 +192,7 @@ public class EncryptionManager {
                 nonce,
                 valuesManager.getServerConnectionPublicKey(),
                 valuesManager.getClientConnectionSecretKey()) != 0) {
-            throw new NumenaLibraryException("ENCRYPTION FAIL");
+            throw new NumenaLibraryException("Failing: ENCRYPTION FAIL");
         }
         return ciphertext;
     }

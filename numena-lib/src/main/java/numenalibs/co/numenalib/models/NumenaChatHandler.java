@@ -5,6 +5,6 @@ import android.os.Handler;
 
 public interface NumenaChatHandler  {
 
-    public void onMessage(byte[] msg);
+    void onMessage(byte[] msg);
 
 }

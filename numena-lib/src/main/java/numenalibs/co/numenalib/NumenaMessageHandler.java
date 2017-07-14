@@ -16,6 +16,7 @@ import java.util.Queue;
 import numenalibs.co.numenalib.encryption.EncryptionManager;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
 import numenalibs.co.numenalib.models.NumenaChatHandler;
+import numenalibs.co.numenalib.models.NumenaCryptoBox;
 import numenalibs.co.numenalib.models.NumenaMethod;
 import numenalibs.co.numenalib.models.NumenaResponse;
 import numenalibs.co.numenalib.models.NumenaUser;
@@ -40,6 +41,7 @@ public class NumenaMessageHandler {
     private SingleMessageManager singleMessageManager;
     private NumenaMessageHelper numenaMessageHelper;
     private CallbackManager callbackManager;
+    private NumenaCryptoBox numenaCryptoBox;
     private Queue<NumenaMethod> forExecute = new LinkedList<NumenaMethod>();
 
     /**
@@ -79,9 +81,14 @@ public class NumenaMessageHandler {
         protocolManager = new ProtocolManager();
         encryptionManager = new EncryptionManager();
         singleMessageManager = new SingleMessageManager();
+        numenaCryptoBox = new NumenaCryptoBox(encryptionManager);
         BroadCaster.getBroadCaster().registerObserver(mHandler);
         numenaMessageHelper = new NumenaMessageHelper(encryptionManager, protocolManager, singleMessageManager);
         callbackManager = new CallbackManager(numenaMessageHelper);
+    }
+
+    public NumenaCryptoBox getNumenaCryptoBox(){
+        return numenaCryptoBox;
     }
 
     public void initNumenaValues(Context context) {

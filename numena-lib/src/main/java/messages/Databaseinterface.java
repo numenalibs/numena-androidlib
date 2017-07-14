@@ -5231,7 +5231,7 @@ public final class Databaseinterface {
           internal_static_messages_DatabaseInterface_DatabaseObject_Capability_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_messages_DatabaseInterface_DatabaseObject_Capability_descriptor,
-              new java.lang.String[] { "Key", "Username", "Write", "Read", });
+              new java.lang.String[] { "NumenaKey", "Username", "Write", "Read", });
           internal_static_messages_DatabaseInterface_StoreObject_descriptor =
             internal_static_messages_DatabaseInterface_descriptor.getNestedTypes().get(1);
           internal_static_messages_DatabaseInterface_StoreObject_fieldAccessorTable = new
@@ -5243,7 +5243,7 @@ public final class Databaseinterface {
           internal_static_messages_DatabaseInterface_GetObject_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_messages_DatabaseInterface_GetObject_descriptor,
-              new java.lang.String[] { "Key", "AppId", "MessageHash", "Limit", });
+              new java.lang.String[] { "NumenaKey", "AppId", "MessageHash", "Limit", });
           return null;
         }
       };
