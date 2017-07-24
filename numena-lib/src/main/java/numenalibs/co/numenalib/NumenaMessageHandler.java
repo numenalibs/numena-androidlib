@@ -8,7 +8,6 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -16,7 +15,7 @@ import java.util.Queue;
 import numenalibs.co.numenalib.encryption.EncryptionManager;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
 import numenalibs.co.numenalib.models.NumenaChatHandler;
-import numenalibs.co.numenalib.models.NumenaCryptoBox;
+import numenalibs.co.numenalib.tools.NumenaCryptoBox;
 import numenalibs.co.numenalib.models.NumenaMethod;
 import numenalibs.co.numenalib.models.NumenaResponse;
 import numenalibs.co.numenalib.models.NumenaUser;

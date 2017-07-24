@@ -13,7 +13,6 @@ import messages.Basemessage.BaseMessage;
 import messages.Clienthello.ClientHello;
 import messages.Databaseinterface;
 import messages.Facademessages;
-import messages.Ledgerinterface;
 import messages.Ledgerinterface.LedgerInterface;
 import messages.Serverhello.ServerHello;
 import messages.Statusmessage.StatusMessage;
@@ -88,7 +87,7 @@ public class NumenaMessageHelper {
             if (STATE == Constants.EXPECTING_SERVERHELLO) {
                 handleServerHelloMessage(msg, listener);
             } else if (STATE == Constants.EXPECTING_MESSAGE) {
-                byte[] decryptedMsg = encryptionManager.decrypt_message(msg);
+                byte[] decryptedMsg = encryptionManager.decryptMessage(msg);
                 BaseMessage basemessage = BaseMessage.parseFrom(decryptedMsg);
                 BaseMessage.Type msgtype = basemessage.getType();
                 NumenaResponse numenaResponse = new NumenaResponse();

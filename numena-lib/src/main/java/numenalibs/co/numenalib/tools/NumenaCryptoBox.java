@@ -1,12 +1,12 @@
-package numenalibs.co.numenalib.models;
+package numenalibs.co.numenalib.tools;
 
 
 import android.support.annotation.Nullable;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import org.libsodium.jni.Sodium;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,15 +15,16 @@ import java.util.Map;
 import messages.Appmessage;
 import numenalibs.co.numenalib.encryption.EncryptionManager;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
+import numenalibs.co.numenalib.models.NumenaKey;
+import numenalibs.co.numenalib.models.NumenaKeyPair;
 import numenalibs.co.numenalib.protocol.ProtocolManager;
-import numenalibs.co.numenalib.tools.Constants;
-import numenalibs.co.numenalib.tools.ValuesManager;
 
 public class NumenaCryptoBox {
 
     private List<NumenaKey> secretKeyList = new ArrayList<>();
     private EncryptionManager encryptionManager;
     private ProtocolManager protocolManager;
+    private Map<String, NumenaKey> secretKeyMap = new HashMap<>();
 
     public NumenaCryptoBox(EncryptionManager encryptionManager, ProtocolManager protocolManager) {
         this.encryptionManager = encryptionManager;
@@ -37,12 +38,13 @@ public class NumenaCryptoBox {
 
     /**
      * Generates two new AppKeys and returns a NumenaKeyPair holding them
+     *
      * @param publickeyName
      * @param secretKeyName
      * @return
      */
 
-    public NumenaKeyPair generateAppKey(String publickeyName, String secretKeyName){
+    public NumenaKeyPair generateAppKey(String publickeyName, String secretKeyName) {
         byte[] PK = new byte[32];
         byte[] SK = new byte[32];
         Sodium.randombytes(PK, 32);
@@ -53,14 +55,13 @@ public class NumenaCryptoBox {
         try {
             pKeyHash = ValuesManager.getInstance().getHash(PK);
             sKeyHash = ValuesManager.getInstance().getHash(SK);
-
         } catch (NumenaLibraryException e) {
             e.printStackTrace();
         }
 
-        NumenaKey publicKey = new NumenaKey(publickeyName,pKeyHash,PK);
-        NumenaKey secretKey = new NumenaKey(secretKeyName,sKeyHash,SK);
-        NumenaKeyPair numenaKeyPair = new NumenaKeyPair(publicKey,secretKey);
+        NumenaKey publicKey = new NumenaKey(publickeyName, pKeyHash, PK);
+        NumenaKey secretKey = new NumenaKey(secretKeyName, sKeyHash, SK);
+        NumenaKeyPair numenaKeyPair = new NumenaKeyPair(publicKey, secretKey);
         return numenaKeyPair;
     }
 
@@ -68,34 +69,51 @@ public class NumenaCryptoBox {
      * Method for decrypting an appMessage
      * If secret is nulled, then NumenaCryptoBox will try to with all available secretKeys in its'
      * secretKeyList
-     * @param content
-     * @param senderPublicKey
+     *
+     * @param appMessageContent
      * @param secretKey
      * @return
      */
 
-    public byte[] decryptAppMessage(byte[] content, byte[] senderPublicKey, @Nullable byte[] secretKey) {
+    public byte[] decryptAppMessage(byte[] appMessageContent, @Nullable byte[] secretKey) throws NumenaLibraryException {
+        byte[] content = null;
         byte[] decryptedContent = null;
-            if (secretKey == null) {
-                try {
-                   decryptedContent = encryptionManager.decrypt_appMessage(content, senderPublicKey, secretKey);
-                } catch (NumenaLibraryException e) {
-                    e.printStackTrace();
-                }
+        byte[] senderPublicKey = null;
+        try {
+            Appmessage.AppMessage appMessage = Appmessage.AppMessage.parseFrom(appMessageContent);
+            content = appMessage.getContent().toByteArray();
+            senderPublicKey = appMessage.getTemppublicKey().toByteArray();
+        } catch (InvalidProtocolBufferException e) {
+            throw new NumenaLibraryException("Failing: Could not parse to App message");
+        }
+        if (secretKey != null) {
+            decryptedContent = encryptionManager.decryptAppMessage(content, senderPublicKey, secretKey);
+        } else {
+            String senderKayHash = ValuesManager.getInstance().getHash(senderPublicKey);
+            if (secretKeyMap.containsKey(senderKayHash)) {
+                NumenaKey key = secretKeyMap.get(senderKayHash);
+                decryptedContent = encryptionManager.decryptAppMessage(content, senderPublicKey, key.getKeyValue());
             } else {
-                for(NumenaKey key : secretKeyList){
-                    try {
-                       decryptedContent = encryptionManager.decrypt_appMessage(content,senderPublicKey,key.getKeyValue());
-                    } catch (NumenaLibraryException e) {
-                        e.printStackTrace();
+                for (NumenaKey key : secretKeyList) {
+                    decryptedContent = encryptionManager.decryptAppMessage(content, senderPublicKey, key.getKeyValue());
+                    if (decryptedContent != null) {
+                        secretKeyMap.put(senderKayHash, key);
+                        break;
                     }
                 }
             }
+        }
+
+        if (decryptedContent == null) {
+            throw new NumenaLibraryException("Failing: Could not decrypt content with provided keys");
+        }
+
         return decryptedContent;
     }
 
     /**
      * Creates a byte array containing content encrypted with the provided encryptionKeys
+     *
      * @param myPublicKey
      * @param encryptionPublicKey
      * @param encryptionSecretKey
@@ -103,7 +121,7 @@ public class NumenaCryptoBox {
      * @return
      */
 
-    public byte[] createEncryptedAppMessage(byte[] myPublicKey, byte[] encryptionPublicKey, byte[] encryptionSecretKey, byte[] content){
+    public byte[] createEncryptedAppMessage(byte[] myPublicKey, byte[] encryptionPublicKey, byte[] encryptionSecretKey, byte[] content) {
         byte[] encryptedContent = new byte[0];
         try {
             encryptedContent = encryptionManager.encryptAppMessage(content, content.length, 0, encryptionPublicKey, encryptionSecretKey);

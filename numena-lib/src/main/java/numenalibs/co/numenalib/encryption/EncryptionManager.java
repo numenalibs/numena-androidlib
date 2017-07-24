@@ -161,7 +161,7 @@ public class EncryptionManager {
         return ciphertext;
     }
 
-    public byte[] decrypt_appMessage(byte[] CIPHERTEXT, byte[] publickey, byte[] secretKey) throws NumenaLibraryException {
+    public byte[] decryptAppMessage(byte[] CIPHERTEXT, byte[] publickey, byte[] secretKey)  {
         byte[] decrypted = new byte[CIPHERTEXT.length - Constants.CRYPTO_BOX_MACBYTES];
         byte[] nonce;
         nonce = Utils.createNonceArray(0);
@@ -172,7 +172,7 @@ public class EncryptionManager {
                 nonce,
                 publickey,
                 secretKey) != 0) {
-            throw new NumenaLibraryException("Failing: APPMESSAGE DECRYPTION FAIL");
+            return null;
         }
 
         return decrypted;
@@ -197,7 +197,7 @@ public class EncryptionManager {
         return ciphertext;
     }
 
-    public byte[] decrypt_message(byte[] CIPHERTEXT) {
+    public byte[] decryptMessage(byte[] CIPHERTEXT) {
         ValuesManager valuesManager = ValuesManager.getInstance();
         byte[] decrypted = new byte[CIPHERTEXT.length - Constants.CRYPTO_BOX_MACBYTES];
         byte[] nonce;

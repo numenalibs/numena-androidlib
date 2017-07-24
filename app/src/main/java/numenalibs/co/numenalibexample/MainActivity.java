@@ -2,8 +2,6 @@ package numenalibs.co.numenalibexample;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -19,6 +17,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,12 +28,13 @@ import numenalibs.co.numenalib.Numena;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
 import numenalibs.co.numenalib.models.NumenaChatHandler;
-import numenalibs.co.numenalib.models.NumenaCryptoBox;
+import numenalibs.co.numenalib.models.NumenaKey;
+import numenalibs.co.numenalib.models.NumenaKeyPair;
+import numenalibs.co.numenalib.tools.NumenaCryptoBox;
 import numenalibs.co.numenalib.models.NumenaObject;
 import numenalibs.co.numenalib.models.NumenaResponse;
 import numenalibs.co.numenalib.models.NumenaUser;
 import numenalibs.co.numenalib.tools.Utils;
-import numenalibs.co.numenalib.tools.ValuesManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,16 +46,22 @@ public class MainActivity extends AppCompatActivity {
     private Activity activity;
     private UserAdapter adapter;
     private NumenaUser selectedUser;
+    private byte[] selectedPublicKey;
     private byte[] TESTORGANISATION = "HAHAH".getBytes();
     private byte[] TESTAPPID = "LOL".getBytes();
+    private Numena numena;
+    NumenaCryptoBox cryptoBox;
+    private JSONObject jsonAppData;
+    private NumenaKeyPair keyPair;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         activity = this;
-        final Numena numena = Numena.getInstance();
+        numena = Numena.getInstance();
         numena.setupNumenaLibrary(this);
+        setupValues();
         initLayout();
         adapter = new UserAdapter(this);
         listView.setAdapter(adapter);
@@ -112,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         regButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                numena.getMessageHandler().register(null, null, userNameText, TESTORGANISATION, userNameText.getBytes(), new ResultsListener<NumenaResponse>() {
+                numena.getMessageHandler().register(null, null, userNameText, TESTORGANISATION, jsonAppData.toString().getBytes(), new ResultsListener<NumenaResponse>() {
                     @Override
                     public void onCompletion(NumenaResponse numenaResponse) {
                         Toast.makeText(activity, "REGISTER " + numenaResponse.getStatus(), Toast.LENGTH_SHORT).show();
@@ -124,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         unregButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                numena.getMessageHandler().unregister(null, null, userNameText, TESTORGANISATION, userNameText.getBytes(), new ResultsListener<NumenaResponse>() {
+                numena.getMessageHandler().unregister(null, null, userNameText, TESTORGANISATION, jsonAppData.toString().getBytes(), new ResultsListener<NumenaResponse>() {
                     @Override
                     public void onCompletion(NumenaResponse numenaResponse) {
                         Toast.makeText(activity, "UNREGISTER " + numenaResponse.getStatus(), Toast.LENGTH_SHORT).show();
@@ -151,7 +160,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 List<NumenaUser> numenaUsers = new ArrayList<NumenaUser>();
                 numenaUsers.add(selectedUser);
-                numena.getMessageHandler().storeObject(numenaUsers, messageText.getBytes(), TESTORGANISATION, TESTAPPID, true, true, new ResultsListener<NumenaResponse>() {
+                byte[] appMessage = cryptoBox.createEncryptedAppMessage(keyPair.getPublicKey().getKeyValue(),selectedPublicKey,keyPair.getSecretKey().getKeyValue(), messageText.getBytes());
+                numena.getMessageHandler().storeObject(numenaUsers, appMessage, TESTORGANISATION, TESTAPPID, true, true, new ResultsListener<NumenaResponse>() {
                     @Override
                     public void onCompletion(NumenaResponse numenaResponse) {
                         Toast.makeText(activity, "STOREOBJECT " + numenaResponse.getStatus(), Toast.LENGTH_SHORT).show();
@@ -164,9 +174,13 @@ public class MainActivity extends AppCompatActivity {
         final NumenaChatHandler handler = new NumenaChatHandler() {
             @Override
             public void onMessage(byte[] bytes) {
-                NumenaCryptoBox cryptoBox = numena.getMessageHandler().getNumenaCryptoBox();
-
-                textMessage.setText(new String(bytes));
+                byte[] decrypted = null;
+                try {
+                    decrypted = cryptoBox.decryptAppMessage(bytes,null);
+                } catch (NumenaLibraryException e) {
+                    e.printStackTrace();
+                }
+                textMessage.setText(new String(decrypted));
             }
         };
 
@@ -181,6 +195,24 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
+
+    }
+
+    private void setupValues(){
+        cryptoBox = numena.getMessageHandler().getNumenaCryptoBox();
+        keyPair = cryptoBox.generateAppKey("PBKEY","SKKEY");
+        NumenaKey publicKey = keyPair.getPublicKey();
+        List<NumenaKey> keys = new ArrayList<>();
+        keys.add(keyPair.getSecretKey());
+        cryptoBox.refreshSecretKeyList(keys);
+        jsonAppData = new JSONObject();
+        try {
+            jsonAppData.put("appPublicKey", new String(publicKey.getKeyValue(), "ISO-8859-1"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -239,6 +271,17 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     selectedUser = numenaUser;
                     Toast.makeText(activity, "SELECTED USER IS " + selectedUser.getUsername(), Toast.LENGTH_SHORT).show();
+                    byte[] publicKey;
+                    try {
+                        JSONObject jsonObject = new JSONObject(new String(selectedUser.getAppData()));
+                        publicKey = jsonObject.getString("appPublicKey").getBytes("ISO-8859-1");
+                        selectedPublicKey = publicKey;
+                        Log.d("NumenaUSER", "SELECTEDPBKEY " + Utils.printByteArray(selectedPublicKey));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
             TextView txt = (TextView) convertView.findViewById(R.id.numenaUserName);
