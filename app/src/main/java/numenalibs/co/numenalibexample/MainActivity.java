@@ -27,7 +27,7 @@ import java.util.List;
 import numenalibs.co.numenalib.Numena;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
-import numenalibs.co.numenalib.models.NumenaChatHandler;
+import numenalibs.co.numenalib.interfaces.NumenaChatHandler;
 import numenalibs.co.numenalib.models.NumenaKey;
 import numenalibs.co.numenalib.models.NumenaKeyPair;
 import numenalibs.co.numenalib.tools.NumenaCryptoBox;

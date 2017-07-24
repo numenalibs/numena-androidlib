@@ -54,10 +54,6 @@ public class SingleMessageManager {
         webSocketConnection.sendBinaryMessage(msg);
     }
 
-    public ResultsListener<byte[]> getListener() {
-        return listener;
-    }
-
     public void setListener(ResultsListener<byte[]> listener) {
         this.listener = listener;
         if(numenaWebSocketHandler != null)

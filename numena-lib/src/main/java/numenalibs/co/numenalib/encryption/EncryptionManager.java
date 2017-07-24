@@ -35,6 +35,10 @@ public class EncryptionManager {
         Sodium sodium = NaCl.sodium();
     }
 
+    /**
+     * Generates a new pair of encryption keys and sets them in the values manager if none are present in the current database.
+     */
+
     public void setupKeys() {
         ValuesManager vm = ValuesManager.getInstance();
         if (!hasIdentityKeys()) {
@@ -52,9 +56,22 @@ public class EncryptionManager {
         }
     }
 
+    /**
+     * Checks if the database contains identity keys
+     * @return
+     */
+
     public boolean hasIdentityKeys(){
         return ValuesManager.getInstance().identityExists();
     }
+
+    /**
+     * Used for signing a message with the provided secretkey
+     * @param originalmessage
+     * @param secretkey
+     * @return
+     * @throws NumenaLibraryException
+     */
 
     public byte[] signMessage(byte[] originalmessage, byte[] secretkey) throws NumenaLibraryException {
         byte[] signature = new byte[Sodium.crypto_sign_bytes()];
@@ -70,6 +87,13 @@ public class EncryptionManager {
         return signature;
     }
 
+    /**
+     * Verifies a serverhello
+     * @param srvHello
+     * @param handshake
+     * @throws NumenaLibraryException
+     */
+
     public void verifyServerhello(ServerHello srvHello, Handshake handshake) throws NumenaLibraryException {
         ValuesManager vm = ValuesManager.getInstance();
         ByteString srvOrganizationSignature = srvHello.getServerOrganizationSignature();
@@ -82,7 +106,7 @@ public class EncryptionManager {
         ) != 0) {
             throw new NumenaLibraryException("Failing: Signature on handshake server identity key is not correct");
         }
-        // 5. Verify that the ServerHello.handshake was signed using the ServerHello.Handshake.server_identity_public_key
+        // Verify that the ServerHello.handshake was signed using the ServerHello.Handshake.server_identity_public_key
         if (Sodium.crypto_sign_verify_detached(
                 srvHello.getHandshakeSignature().toByteArray(),
                 handshake.toByteArray(),
@@ -91,7 +115,7 @@ public class EncryptionManager {
         ) != 0) {
             throw new NumenaLibraryException("Failing: Handshake not signed");
         }
-        // 6. Verify that the ServerHello.handshake.timestamp_now is valid (within the last hour)
+        // Verify that the ServerHello.handshake.timestamp_now is valid (within the last hour)
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         long secondsSinceEpoch = calendar.getTimeInMillis() / 1000L;
         long handshaketime = handshake.getTimestampNow();
@@ -99,6 +123,14 @@ public class EncryptionManager {
             throw new NumenaLibraryException("Failing: Handshake timestamp is not valid");
         }
     }
+
+    /**
+     * Used for creating a handshake signature with the provided handshake and connectionkey
+     * @param clientHandshake
+     * @param clientConnectionPublicKey
+     * @return
+     * @throws NumenaLibraryException
+     */
 
     public byte[] makeHandshakeSignature(Clienthello.ClientHello.Handshake clientHandshake, byte[] clientConnectionPublicKey) throws NumenaLibraryException{
         byte[] dstSignature = new byte[SodiumConstants.SIGNATURE_BYTES];
@@ -114,21 +146,22 @@ public class EncryptionManager {
         return dstSignature;
     }
 
-    public byte[] encryptCipherText(Clienthello.ClientHello.SignedHandshake signedHandshake) throws NumenaLibraryException {
+    /**
+     * Encrypts a signedHandshake
+     * @param signedHandshake
+     * @return
+     * @throws NumenaLibraryException
+     */
+
+    public byte[] encryptSignedHandshake(Clienthello.ClientHello.SignedHandshake signedHandshake) throws NumenaLibraryException {
         ValuesManager vm = ValuesManager.getInstance();
         byte[] MESSAGE = signedHandshake.toByteArray();
         int MESSAGE_LEN = signedHandshake.getSerializedSize();
         int CIPHERTEXT_LEN = Constants.CRYPTO_BOX_MACBYTES + MESSAGE_LEN;
         byte[] ciphertext = new byte[CIPHERTEXT_LEN];
 
-        // 8.4 Set encrypted handshake
+        // Set encrypted handshake
         byte[] nonce = new byte[SodiumConstants.NONCE_BYTES];
-        /*
-         Remember! When testing locally, change srv_connection_pk to client_connection_pk.
-         crypto_box_easy(ciphertext, MESSAGE, MESSAGE_LEN, nonce,
-                    bob_publickey, alice_secretkey).
-         Bob is the server. Alice is us.
-          */
         if (crypto_box_easy(
                 ciphertext,
                 MESSAGE,
@@ -142,6 +175,17 @@ public class EncryptionManager {
 
         return ciphertext;
     }
+
+    /**
+     * Used for encrypting an Appmessage
+     * @param MESSAGE
+     * @param MESSAGE_LEN
+     * @param nonceCounter
+     * @param publickey
+     * @param secretkey
+     * @return
+     * @throws NumenaLibraryException
+     */
 
     public byte[] encryptAppMessage(byte[] MESSAGE, int MESSAGE_LEN, int nonceCounter, byte[] publickey, byte[] secretkey) throws NumenaLibraryException {
         int CIPHERTEXT_LEN = Constants.CRYPTO_BOX_MACBYTES + MESSAGE_LEN;
@@ -161,6 +205,14 @@ public class EncryptionManager {
         return ciphertext;
     }
 
+    /**
+     * Used for decrypting an appMessage
+     * @param CIPHERTEXT
+     * @param publickey
+     * @param secretKey
+     * @return
+     */
+
     public byte[] decryptAppMessage(byte[] CIPHERTEXT, byte[] publickey, byte[] secretKey)  {
         byte[] decrypted = new byte[CIPHERTEXT.length - Constants.CRYPTO_BOX_MACBYTES];
         byte[] nonce;
@@ -177,6 +229,15 @@ public class EncryptionManager {
 
         return decrypted;
     }
+
+    /**
+     * Used for encrypting a message connection keys
+     * @param MESSAGE
+     * @param MESSAGE_LEN
+     * @param nonceCounter
+     * @return
+     * @throws NumenaLibraryException
+     */
 
     public byte[] encryptMessage(byte[] MESSAGE, int MESSAGE_LEN, int nonceCounter) throws NumenaLibraryException {
         int CIPHERTEXT_LEN = Constants.CRYPTO_BOX_MACBYTES + MESSAGE_LEN;
@@ -196,6 +257,12 @@ public class EncryptionManager {
         }
         return ciphertext;
     }
+
+    /**
+     * Used for decrypting a message with connection keys
+     * @param CIPHERTEXT
+     * @return
+     */
 
     public byte[] decryptMessage(byte[] CIPHERTEXT) {
         ValuesManager valuesManager = ValuesManager.getInstance();

@@ -19,7 +19,7 @@ import messages.Statusmessage.StatusMessage;
 import numenalibs.co.numenalib.encryption.EncryptionManager;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
-import numenalibs.co.numenalib.models.NumenaChatHandler;
+import numenalibs.co.numenalib.interfaces.NumenaChatHandler;
 import numenalibs.co.numenalib.models.NumenaMethod;
 import numenalibs.co.numenalib.models.NumenaObject;
 import numenalibs.co.numenalib.models.NumenaResponse;
@@ -53,6 +53,10 @@ public class NumenaMessageHelper {
         this.protocolManager = protocolManager;
         this.encryptionManager = encryptionManager;
     }
+
+    /**
+     * Closes the connection and resets the initial values used when opening a the websocket.
+     */
 
     public void closeConnection(){
         STATE = Constants.EXPECTING_SERVERHELLO;
@@ -265,7 +269,7 @@ public class NumenaMessageHelper {
             dstSignature = encryptionManager.makeHandshakeSignature(handshake, valuesManager.getClientConnectionPublicKey());
         }
         ClientHello.SignedHandshake signedHandshake = protocolManager.buildSignedHandshake(handshake, dstSignature);
-        byte[] cipherText = encryptionManager.encryptCipherText(signedHandshake);
+        byte[] cipherText = encryptionManager.encryptSignedHandshake(signedHandshake);
         BaseMessage baseMessage = protocolManager.packClientHello(cipherText);
         return baseMessage;
     }
@@ -290,6 +294,13 @@ public class NumenaMessageHelper {
         sendBaseMessage(baseMessage);
     }
 
+    /**
+     * Builds a contactEvent containing the other contact and own user.
+     * @param self
+     * @param contact
+     * @return
+     */
+
     public LedgerInterface.ContactEvent buildContactEvent(NumenaUser self, NumenaUser contact) {
         LedgerInterface.UserEvent userEvent = createUserEvent(self.getPublicKey(), self.getSecretKey(), self.getUsername(), self.getOrganisationId(), self.getAppData());
         LedgerInterface.User protoContact = protocolManager.userProto(contact.getUsername(), contact.getPublicKey(), contact.getOrganisationId(), contact.getAppData());
@@ -303,6 +314,13 @@ public class NumenaMessageHelper {
         return contactEvent;
     }
 
+    /**
+     * Builds a contact event with type REMOVE and sends it
+     * @param self
+     * @param contact
+     * @param clientlistener
+     */
+
     public void buildAndSendRemoveContact(NumenaUser self, NumenaUser contact, ResultsListener<NumenaResponse> clientlistener) {
         LedgerInterface.ContactEvent contactEvent = buildContactEvent(self, contact);
         BaseMessage baseMessage = protocolManager.removeContact(contactEvent);
@@ -311,6 +329,13 @@ public class NumenaMessageHelper {
         sendBaseMessage(baseMessage);
 
     }
+
+    /**
+     * Builds a contact event with type ADD and sends it
+     * @param self
+     * @param contact
+     * @param clientlistener
+     */
 
     public void buildAndSendAddContact(NumenaUser self, NumenaUser contact, ResultsListener<NumenaResponse> clientlistener) {
         LedgerInterface.ContactEvent contactEvent = buildContactEvent(self, contact);
@@ -321,6 +346,18 @@ public class NumenaMessageHelper {
 
     }
 
+    /**
+     * Builds a databaseobject with type STORE. Uses the list of NumenaUsers as verifiers.
+     * The READ/WRITE permission is not individual but set on all verifiers.
+     * @param userList
+     * @param content
+     * @param organisationId
+     * @param appId
+     * @param writePermission
+     * @param readPermission
+     * @param clientlistener
+     */
+
     public void buildAndStoreObject(List<NumenaUser> userList, byte[] content, byte[] organisationId, byte[] appId, boolean writePermission, boolean readPermission, ResultsListener<NumenaResponse> clientlistener) {
         List<Databaseinterface.DatabaseInterface.DatabaseObject.Capability> verifiers = protocolManager.generateVerifiers(userList, writePermission, readPermission);
         BaseMessage baseMessage = protocolManager.storeObject(verifiers, organisationId, appId, content);
@@ -328,6 +365,15 @@ public class NumenaMessageHelper {
         singleMessageManager.setListener(listener);
         sendBaseMessage(baseMessage);
     }
+
+    /**
+     * Builds a databaseObject with type GET.
+     * @param publicKey
+     * @param appId
+     * @param messageHash
+     * @param limit
+     * @param clientlistener
+     */
 
     public void buildAndGetObject(byte[] publicKey, byte[] appId, byte[] messageHash, int limit, ResultsListener<NumenaResponse> clientlistener){
         BaseMessage baseMessage = protocolManager.getObject(publicKey,appId,messageHash,limit);

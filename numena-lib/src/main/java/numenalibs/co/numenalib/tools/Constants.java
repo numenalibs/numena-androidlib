@@ -18,6 +18,7 @@ public class Constants {
     public static final String RESPONSE_FAILURE = "FAILED_CALL";
     public static final int CONTACTTYPE_ADD = 5;
     public static final int CONTACTTYPE_REMOVE = 6;
+    public static final String URL_DEV = "ws://dev.numena.co:8000";
     /**
      * KEYNAMES
      */

@@ -21,7 +21,7 @@ public class ValuesManager implements NumenaCommunicatorInterface {
     private int localNonce;
     private int remoteNonce;
     private boolean isConnectionToOrganizationServer = false;
-    private String connectionUrl = "ws://dev.numena.co:8000";
+    private String connectionUrl = Constants.URL_DEV;
     HashMap<String, byte[]> organisationKeys = new HashMap<>();
     HashMap<String, byte[]> keys = new HashMap<>();
     private byte[] organisationId = "Numena".getBytes();

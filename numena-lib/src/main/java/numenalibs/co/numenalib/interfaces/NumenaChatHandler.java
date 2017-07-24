@@ -1,4 +1,4 @@
-package numenalibs.co.numenalib.models;
+package numenalibs.co.numenalib.interfaces;
 
 import android.os.Handler;
 

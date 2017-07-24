@@ -20,7 +20,6 @@ public class NumenaWebSocketHandler implements WebSocket.ConnectionHandler {
 
     @Override
     public void onOpen() {
-        Log.d("CONNECTION", "OPENED");
 
     }
 

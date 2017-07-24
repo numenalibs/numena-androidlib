@@ -14,7 +14,7 @@ import java.util.Queue;
 
 import numenalibs.co.numenalib.encryption.EncryptionManager;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
-import numenalibs.co.numenalib.models.NumenaChatHandler;
+import numenalibs.co.numenalib.interfaces.NumenaChatHandler;
 import numenalibs.co.numenalib.tools.NumenaCryptoBox;
 import numenalibs.co.numenalib.models.NumenaMethod;
 import numenalibs.co.numenalib.models.NumenaResponse;
@@ -89,6 +89,12 @@ public class NumenaMessageHandler {
     public NumenaCryptoBox getNumenaCryptoBox(){
         return numenaCryptoBox;
     }
+
+    /**
+     * Uses the context to initialise a SQLite database
+     * Also creates a pair of identitykeys
+     * @param context
+     */
 
     public void initNumenaValues(Context context) {
         ValuesManager valuesManager = ValuesManager.getInstance();

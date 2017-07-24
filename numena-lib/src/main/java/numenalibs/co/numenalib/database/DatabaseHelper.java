@@ -32,10 +32,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.d("CREATING", " DATABASE");
         db.execSQL("CREATE TABLE " + TABLE_NAME + "(ID INTEGER PRIMARY KEY AUTOINCREMENT, KEYNAME TEXT, KEYVALUE BLOB, KEYHASH TEXT);");
     }
 
+    /**
+     * Inserts a key into the database
+     * @param keyName
+     * @param keyValue
+     * @param keyHash
+     */
 
     public void insertValuesIntoKeys(String keyName, byte[] keyValue, String keyHash) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -51,12 +56,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
+    /**
+     * Queries the database to check if any identitykeys are present
+     * @return
+     */
+
     public boolean identityKeysExists() {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + TABLE_NAME + " WHERE KEYNAME = " + "'" + Constants.CLIENT_IDENTITY_PUBLICKEY + "'" + " OR KEYNAME = " + "'" + Constants.CLIENT_IDENTITY_SECRETKEY + "'" + ";";
         Cursor c = db.rawQuery(query, null);
         return c.getCount() >= 2;
     }
+
+    /**
+     * Queries every key from the database and returns a list of numenakeys.
+     * @return
+     */
 
     public List<NumenaKey> getAllKeys() {
         SQLiteDatabase db = this.getWritableDatabase();

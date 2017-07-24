@@ -8,7 +8,7 @@ import java.util.List;
 
 import numenalibs.co.numenalib.NumenaMessageHelper;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
-import numenalibs.co.numenalib.models.NumenaChatHandler;
+import numenalibs.co.numenalib.interfaces.NumenaChatHandler;
 import numenalibs.co.numenalib.models.NumenaMethod;
 import numenalibs.co.numenalib.models.NumenaResponse;
 import numenalibs.co.numenalib.models.NumenaUser;
@@ -177,6 +177,17 @@ public class CallbackManager {
         numenaMessageHelper.buildAndGetObject(usedPubKey,appId,messageHash,limit,clientlistener);
 
     }
+
+    /**
+     * Method that executes the call for Subscribe
+     * Using NumenaMessageHelper to build and send a basemessage containing a facade.subcribe message
+     * @param identityPublicKey
+     * @param identitySecretKey
+     * @param organisationId
+     * @param appId
+     * @param chatHandler
+     * @param clientlistener
+     */
 
     private void executeSubscribeCall(byte[] identityPublicKey, byte[] identitySecretKey, byte[] organisationId, byte[] appId,NumenaChatHandler chatHandler, ResultsListener<NumenaResponse> clientlistener) {
         ValuesManager valuesManager = ValuesManager.getInstance();
