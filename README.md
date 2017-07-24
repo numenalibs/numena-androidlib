@@ -75,6 +75,62 @@ numena.getMessageHandler().storeObject(numenaUsers, content, organisationId, app
 
 ```
 
+### Instant Messaging
+In order to enable instant messaging, it is required by the user to subscribe to his own publickey.
+To handle the results from every message received, a NumenaChatHandler is required.
+This handler is used as an argument when subcribing
+```java
+NumenaChatHandler handler = new NumenaChatHandler() {
+            @Override
+            public void onMessage(byte[] bytes) {
+
+            }
+        };
+
+```
+The two null arguments are the public- and secretkey which is not required. If not provided the first forged keys will be used.
+```java
+numena.getMessageHandler().subscribe(null, null, TESTORGANISATION, TESTAPPID, handler, newResultsListener<NumenaResponse>() {
+                    @Override
+                    public void onCompletion(NumenaResponse numenaResponse) {
+
+                    }
+                });
+
+```
+#### NumenaCryptoBox
+You can use the NumenaCryptobox to enable another layer of encryption.
+A keypair of encryptionkeys is required in order to make this work.
+This is a keypair which you should register yourself. Put this these in appdata, formattet in e.g. JSON
+Also put these newly forged keys inside the cryptobox. This way it will try to decrypt the incoming message automatically.
+```java
+NumenaCryptoBox cryptoBox = numena.getMessageHandler().getNumenaCryptoBox();
+NumenaKeyPair keyPair = cryptoBox.generateAppKey("PKEYNAME","SKEYNAME");
+List<NumenaKey> keys = new ArrayList<>();
+keys.add(keyPair.getSecretKey());
+cryptoBox.refreshSecretKeyList(keys);
+```
+This is how you send a message encrypted with a selected users publickey
+```java
+//The keypair from before
+byte[] myAppPublicKey = ....
+byte[] myAppSecretKey = ....
+//The publickey belonging to the user
+byte[] selectedPublickey = ....
+//Here the appMessage is created and encrypted.
+byte[] appMessage = cryptoBox.createEncryptedAppMessage(myAppPublicKey,selectedPublicKey,myAppSecretKey, messageText.getBytes());
+```
+This is how you can use the cryptobox to get the content when an appmessage is received.
+It is recommended to put these lines of code inside the "onMessage" method in the NumenaChatHandler. This way you can instantly decrypt the users message.
+```java
+try {
+    decrypted = cryptoBox.decryptAppMessage(bytes,null);
+} catch (NumenaLibraryException e) {
+    e.printStackTrace();
+}
+```
+
+
 #### NumenaResponse 
 ```java
 public class NumenaResponse {
