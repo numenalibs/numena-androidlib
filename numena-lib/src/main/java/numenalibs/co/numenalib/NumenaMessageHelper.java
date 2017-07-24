@@ -49,11 +49,6 @@ public class NumenaMessageHelper {
         STATE = Constants.EXPECTING_SERVERHELLO;
     }
 
-    public NumenaMessageHelper(ProtocolManager protocolManager, EncryptionManager encryptionManager){
-        this.protocolManager = protocolManager;
-        this.encryptionManager = encryptionManager;
-    }
-
     /**
      * Closes the connection and resets the initial values used when opening a the websocket.
      */

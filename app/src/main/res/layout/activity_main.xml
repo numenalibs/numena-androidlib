@@ -58,9 +58,9 @@
             android:id="@+id/getUsersButton"/>
 
         <ListView
+            android:id="@+id/numenaUserListView"
             android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:id="@+id/numenaUserListView"></ListView>
+            android:layout_height="180dp"></ListView>
 
         <Button
             android:layout_width="match_parent"
