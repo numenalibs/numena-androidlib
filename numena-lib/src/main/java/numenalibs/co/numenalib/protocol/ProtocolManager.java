@@ -387,20 +387,20 @@ public class ProtocolManager {
     }
 
     public BaseMessage getObject(byte[] own_id_pkey, byte[] appId, byte[] message_hash, int limit) {
-        DatabaseInterface.GetObject.Builder get_obj_builder = Databaseinterface.DatabaseInterface.GetObject.newBuilder();
+        DatabaseInterface.GetObject.Builder get_obj_builder = DatabaseInterface.GetObject.newBuilder();
         // GetObject
         get_obj_builder.setKey(ByteString.copyFrom(own_id_pkey));
         get_obj_builder.setAppId(ByteString.copyFrom(appId));
         get_obj_builder.setMessageHash(ByteString.copyFrom(message_hash));
         get_obj_builder.setLimit(limit);
 
-        Databaseinterface.DatabaseInterface.GetObject get_obj = get_obj_builder.build();
+        DatabaseInterface.GetObject get_obj = get_obj_builder.build();
 
         // DatabaseInterface
-        Databaseinterface.DatabaseInterface.Builder database_interface_builder = Databaseinterface.DatabaseInterface.newBuilder();
+        DatabaseInterface.Builder database_interface_builder = DatabaseInterface.newBuilder();
         database_interface_builder.setType(Databaseinterface.DatabaseInterface.Type.GET);
         database_interface_builder.setGetObject(get_obj);
-        Databaseinterface.DatabaseInterface database_interface = database_interface_builder.build();
+        DatabaseInterface database_interface = database_interface_builder.build();
 
         // BaseMessage
         Basemessage.BaseMessage.Builder base_msg_builder = Basemessage.BaseMessage.newBuilder();
@@ -439,11 +439,11 @@ public class ProtocolManager {
      * @return
      */
 
-    public Basemessage.BaseMessage subscribe(Facademessages.Subscribe sub) {
-        Basemessage.BaseMessage.Builder baseBuilder = Basemessage.BaseMessage.newBuilder();
+    public BaseMessage subscribe(Facademessages.Subscribe sub) {
+        BaseMessage.Builder baseBuilder = BaseMessage.newBuilder();
         baseBuilder.setType(Basemessage.BaseMessage.Type.SUBSCRIBE);
         baseBuilder.setSubscribe(sub);
-        Basemessage.BaseMessage baseMessage = baseBuilder.build();
+        BaseMessage baseMessage = baseBuilder.build();
         return baseMessage;
     }
 

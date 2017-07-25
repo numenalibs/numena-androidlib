@@ -19,6 +19,14 @@ public class Constants {
     public static final int CONTACTTYPE_ADD = 5;
     public static final int CONTACTTYPE_REMOVE = 6;
     public static final String URL_DEV = "ws://dev.numena.co:8000";
+    public static final String WHITELISTTEXT = "6c7771fdc6d83b641ad4e994a9c9bdb6e786d1b5e6953eaf1fa63b0223c156e4";
+    public static final String NUMENAORG = "Numena";
+    public static final String NUMENADEBUGLABEL ="NUMENADEBUG";
+    public static final int SOCKETCONNECTTIMEOUT = 15000;
+    public static final int MAXMESSAGEPAYLOADSIZE = 10000000;
+    public static final int MAXFRAMEPAYLOADSIZE = 10000000;
+
+
     /**
      * KEYNAMES
      */

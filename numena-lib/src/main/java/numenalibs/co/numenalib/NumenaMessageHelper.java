@@ -95,11 +95,9 @@ public class NumenaMessageHelper {
                 boolean incremenetRemoteNonce = true;
                 switch (msgtype) {
                     case STATUS:
-                        Log.d("TYPE IS", "STATUS");
                         handleStatusMessage(basemessage, numenaResponse);
                         break;
                     case SUBSCRIBE:
-                        Log.d("TYPE IS", "SUBSCRIBE");
                         break;
                     case DATABASE:
                         numenaResponse.setStatus(Constants.RESPONSE_SUCCESS);
@@ -111,15 +109,12 @@ public class NumenaMessageHelper {
                         }
                         incrementLocalNonce = false;
                         reportToListener = false;
-                        Log.d("TYPE IS", "DATABASE");
                         break;
                     case LEDGER:
-                        Log.d("TYPE IS", "LEDGER");
                         handleLedgerMessage(basemessage, numenaResponse);
                         break;
                     case ACK:
                         reportToListener = false;
-                        Log.d("TYPE IS", "ACK");
                         break;
                     default:
                         break;
@@ -177,7 +172,6 @@ public class NumenaMessageHelper {
 
     private void handleStatusMessage(BaseMessage baseMessage, NumenaResponse numenaResponse) {
         StatusMessage status = baseMessage.getStatus();
-
         long code = status.getStatusCode();
         if (code == 1) {
             numenaResponse.setStatus(Constants.RESPONSE_SUCCESS);

@@ -17,14 +17,14 @@ import numenalibs.co.numenalib.models.NumenaKey;
 
 public class ValuesManager implements NumenaCommunicatorInterface {
 
-    private byte[] whitelist = Utils.hexStringToByteArray("6c7771fdc6d83b641ad4e994a9c9bdb6e786d1b5e6953eaf1fa63b0223c156e4");;
+    private byte[] whitelist = Utils.hexStringToByteArray(Constants.WHITELISTTEXT);;
     private int localNonce;
     private int remoteNonce;
     private boolean isConnectionToOrganizationServer = false;
     private String connectionUrl = Constants.URL_DEV;
     HashMap<String, byte[]> organisationKeys = new HashMap<>();
     HashMap<String, byte[]> keys = new HashMap<>();
-    private byte[] organisationId = "Numena".getBytes();
+    private byte[] organisationId = Constants.NUMENAORG.getBytes();
     private static ValuesManager instance;
     private DatabaseHelper databaseHelper;
 
@@ -78,17 +78,6 @@ public class ValuesManager implements NumenaCommunicatorInterface {
         } catch (NoSuchAlgorithmException e) {
             throw new NumenaLibraryException("Failing: Cannot get SHA-256 Encoding");
         }
-    }
-
-    public void printValues(){
-        Log.d("VALUES", "serverConnectionPublicKey " +  Utils.printByteArray(keys.get(Constants.SERVER_CONNECTION_PUBLICKEY)));
-        Log.d("VALUES", "serverIdentityPublicKey " +   Utils.printByteArray(keys.get(Constants.SERVER_IDENTITY_PUBLICKEY)));
-        Log.d("VALUES", "clientConnectionPublicKey " +  Utils.printByteArray(keys.get(Constants.CLIENT_CONNECTION_PUBLICKEY)));
-        Log.d("VALUES", "clientConnectionSecretKey " +   Utils.printByteArray(keys.get(Constants.CLIENT_CONNECTION_SECRETKEY)));
-        Log.d("VALUES", "clientIdentityPublicKey " +   Utils.printByteArray(keys.get(Constants.CLIENT_IDENTITY_PUBLICKEY)));
-        Log.d("VALUES", "clientIdentitySecretKey " +  Utils.printByteArray(keys.get(Constants.CLIENT_CONNECTION_SECRETKEY)));
-        Log.d("VALUES", "localNonce " + localNonce);
-        Log.d("VALUES ", "remoteNonce" + remoteNonce);
     }
 
     public String getConnectionUrl() {

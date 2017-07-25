@@ -9,6 +9,10 @@ import de.tavendo.autobahn.WebSocketOptions;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
 import numenalibs.co.numenalib.tools.ValuesManager;
 
+import static numenalibs.co.numenalib.tools.Constants.MAXFRAMEPAYLOADSIZE;
+import static numenalibs.co.numenalib.tools.Constants.MAXMESSAGEPAYLOADSIZE;
+import static numenalibs.co.numenalib.tools.Constants.SOCKETCONNECTTIMEOUT;
+
 public class SingleMessageManager {
 
     private WebSocketConnection webSocketConnection;
@@ -41,9 +45,9 @@ public class SingleMessageManager {
         try {
             numenaWebSocketHandler = new NumenaWebSocketHandler(listener);
             WebSocketOptions options = new WebSocketOptions();
-            options.setSocketConnectTimeout(1000);
-            options.setMaxMessagePayloadSize(10000000); //max size of message
-            options.setMaxFramePayloadSize(10000000); //max size of frame
+            options.setSocketConnectTimeout(SOCKETCONNECTTIMEOUT);
+            options.setMaxMessagePayloadSize(MAXMESSAGEPAYLOADSIZE);
+            options.setMaxFramePayloadSize(MAXFRAMEPAYLOADSIZE);
             webSocketConnection.connect(vm.getConnectionUrl(), numenaWebSocketHandler, options);
         } catch (WebSocketException e) {
             e.printStackTrace();
