@@ -2,6 +2,7 @@ package numenalibs.co.numenalibexample;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -44,11 +45,10 @@ public class MainActivity extends AppCompatActivity {
     private ListView listView;
     private String userNameText, query, messageText;
     private Activity activity;
-    private UserAdapter adapter;
     private NumenaUser selectedUser;
     private byte[] selectedPublicKey;
-    private byte[] TESTORGANISATION = "HAHAH".getBytes();
-    private byte[] TESTAPPID = "LOL".getBytes();
+    public static byte[] TESTORGANISATION = "HAHAH".getBytes();
+    public static byte[] TESTAPPID = "LOL".getBytes();
     private Numena numena;
     NumenaCryptoBox cryptoBox;
     private JSONObject jsonAppData;
@@ -63,26 +63,6 @@ public class MainActivity extends AppCompatActivity {
         numena.setupNumenaLibrary(this);
         setupValues();
         initLayout();
-        adapter = new UserAdapter(this);
-        listView.setAdapter(adapter);
-
-        message.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                messageText = s.toString();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
 
         userName.addTextChangedListener(new TextWatcher() {
             @Override
@@ -101,23 +81,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        queryText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                query = s.toString();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
         regButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,6 +88,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onCompletion(NumenaResponse numenaResponse) {
                         Toast.makeText(activity, "REGISTER " + numenaResponse.getStatus(), Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(MainActivity.this, UserSelectActivity.class);
+                        intent.putExtra("PBKEY", keyPair.getPublicKey().getKeyValue());
+                        intent.putExtra("SKKEY", keyPair.getSecretKey().getKeyValue());
+                        startActivity(intent);
                     }
                 });
             }
@@ -137,60 +104,6 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onCompletion(NumenaResponse numenaResponse) {
                         Toast.makeText(activity, "UNREGISTER " + numenaResponse.getStatus(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        });
-
-        getUsersButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                numena.getMessageHandler().getUsers(query, TESTORGANISATION, new ResultsListener<NumenaResponse>() {
-                    @Override
-                    public void onCompletion(NumenaResponse numenaResponse) {
-                        Toast.makeText(activity, "QUERY " + numenaResponse.getStatus(), Toast.LENGTH_SHORT).show();
-                        adapter.refreshData(numenaResponse.getNumenaObjects());
-                    }
-                });
-            }
-        });
-
-        sendMessageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                List<NumenaUser> numenaUsers = new ArrayList<NumenaUser>();
-                numenaUsers.add(selectedUser);
-                byte[] appMessage = cryptoBox.createEncryptedAppMessage(keyPair.getPublicKey().getKeyValue(),selectedPublicKey,keyPair.getSecretKey().getKeyValue(), messageText.getBytes());
-                numena.getMessageHandler().storeObject(numenaUsers, appMessage, TESTORGANISATION, TESTAPPID, true, true, new ResultsListener<NumenaResponse>() {
-                    @Override
-                    public void onCompletion(NumenaResponse numenaResponse) {
-                        Toast.makeText(activity, "STOREOBJECT " + numenaResponse.getStatus(), Toast.LENGTH_SHORT).show();
-
-                    }
-                });
-            }
-        });
-
-        final NumenaChatHandler handler = new NumenaChatHandler() {
-            @Override
-            public void onMessage(byte[] bytes) {
-                byte[] decrypted = null;
-                try {
-                    decrypted = cryptoBox.decryptAppMessage(bytes,null);
-                } catch (NumenaLibraryException e) {
-                    e.printStackTrace();
-                }
-                textMessage.setText(new String(decrypted));
-            }
-        };
-
-        subscribeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                numena.getMessageHandler().subscribe(null, null, TESTORGANISATION, TESTAPPID, handler, new ResultsListener<NumenaResponse>() {
-                    @Override
-                    public void onCompletion(NumenaResponse numenaResponse) {
-                        Toast.makeText(activity, "SUBSCRIBE " + numenaResponse.getStatus(), Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -219,74 +132,12 @@ public class MainActivity extends AppCompatActivity {
     private void initLayout() {
         regButton = (Button) findViewById(R.id.registerButton);
         unregButton = (Button) findViewById(R.id.unregisterButton);
-        subscribeButton = (Button) findViewById(R.id.subscribeButton);
-        sendMessageButton = (Button) findViewById(R.id.sendMessageButton);
-        getUsersButton = (Button) findViewById(R.id.getUsersButton);
-        textMessage = (TextView) findViewById(R.id.textMessage);
         userName = (EditText) findViewById(R.id.userName);
-        message = (EditText) findViewById(R.id.storeMessage);
-        queryText = (EditText) findViewById(R.id.queryText);
-        listView = (ListView) findViewById(R.id.numenaUserListView);
     }
 
-    public class UserAdapter extends BaseAdapter {
-
-        private List<NumenaObject> numenaUserList = new ArrayList<>();
-        private Context context;
-        private LayoutInflater layoutInflater;
-
-        public UserAdapter(Context context) {
-            this.context = context;
-            layoutInflater = LayoutInflater.from(context);
-
-        }
-
-        public void refreshData(List<NumenaObject> numenaUsers) {
-            numenaUserList.clear();
-            numenaUserList.addAll(numenaUsers);
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public int getCount() {
-            return numenaUserList.size();
-        }
-
-        @Override
-        public NumenaObject getItem(int position) {
-            return numenaUserList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            final NumenaUser numenaUser = (NumenaUser) getItem(position);
-            convertView = layoutInflater.inflate(R.layout.listitem_numenauser, null);
-            convertView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    selectedUser = numenaUser;
-                    Toast.makeText(activity, "SELECTED USER IS " + selectedUser.getUsername(), Toast.LENGTH_SHORT).show();
-                    byte[] publicKey;
-                    try {
-                        JSONObject jsonObject = new JSONObject(new String(selectedUser.getAppData()));
-                        publicKey = jsonObject.getString("appPublicKey").getBytes("ISO-8859-1");
-                        selectedPublicKey = publicKey;
-                        Log.d("NumenaUSER", "SELECTEDPBKEY " + Utils.printByteArray(selectedPublicKey));
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            TextView txt = (TextView) convertView.findViewById(R.id.numenaUserName);
-            txt.setText(numenaUser.getUsername());
-            return convertView;
-        }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        numena.getMessageHandler().closeSocket();
     }
 }
