@@ -100,13 +100,7 @@ public class NumenaMessageHelper {
                     case SUBSCRIBE:
                         break;
                     case DATABASE:
-                        numenaResponse.setStatus(Constants.RESPONSE_SUCCESS);
-                        if(numenaChatHandler != null){
-                            Databaseinterface.DatabaseInterface databaseInterface = basemessage.getDatabase();
-                            List<Databaseinterface.DatabaseInterface.DatabaseObject> objects = databaseInterface.getResponseList();
-                            Databaseinterface.DatabaseInterface.DatabaseObject object = objects.get(0);
-                            numenaChatHandler.onMessage(object.getEncryptedMessage().toByteArray());
-                        }
+                        handleDatabaseMessage(basemessage,numenaResponse);
                         incrementLocalNonce = false;
                         reportToListener = false;
                         break;
@@ -138,6 +132,23 @@ public class NumenaMessageHelper {
      * METHODS FOR HANDLING INCOMING MESSAGES
      * *************************************************************************
      */
+
+    /**
+     * Method for handler a databaseMessage
+     * Needs a NumenaChatHandler, created in the GUI to execute onMessage
+     * @param baseMessage
+     * @param numenaResponse
+     */
+
+    private void handleDatabaseMessage(BaseMessage baseMessage, NumenaResponse numenaResponse){
+        numenaResponse.setStatus(Constants.RESPONSE_SUCCESS);
+        if(numenaChatHandler != null){
+            Databaseinterface.DatabaseInterface databaseInterface = baseMessage.getDatabase();
+            List<Databaseinterface.DatabaseInterface.DatabaseObject> objects = databaseInterface.getResponseList();
+            Databaseinterface.DatabaseInterface.DatabaseObject object = objects.get(0);
+            numenaChatHandler.onMessage(object.getEncryptedMessage().toByteArray());
+        }
+    }
 
     /**
      * Method for handling a ledgerMessage
@@ -207,6 +218,16 @@ public class NumenaMessageHelper {
     /************************************************************************************
      * METHODS FOR BUILDING MESSAGES
      * *********************************************************************************
+     */
+
+    /**
+     * Builds a FacadeMessage.subcribe, sets a signature and sends it.
+     * @param identityPublicKey
+     * @param identitySecretKey
+     * @param organisationId
+     * @param appId
+     * @param chatHandler
+     * @param clientlistener
      */
 
     public void buildAndSendSubscribe(byte[] identityPublicKey, byte[] identitySecretKey, byte[] organisationId, byte[] appId, NumenaChatHandler chatHandler, ResultsListener<NumenaResponse> clientlistener) {
