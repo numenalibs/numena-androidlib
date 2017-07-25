@@ -39,14 +39,10 @@ import numenalibs.co.numenalib.tools.Utils;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button regButton, unregButton, subscribeButton, sendMessageButton, getUsersButton;
-    private TextView textMessage;
-    private EditText userName, message, queryText;
-    private ListView listView;
-    private String userNameText, query, messageText;
+    private Button regButton, unregButton;
+    private EditText userName;
+    private String userNameText;
     private Activity activity;
-    private NumenaUser selectedUser;
-    private byte[] selectedPublicKey;
     public static byte[] TESTORGANISATION = "HAHAH".getBytes();
     public static byte[] TESTAPPID = "LOL".getBytes();
     private Numena numena;
