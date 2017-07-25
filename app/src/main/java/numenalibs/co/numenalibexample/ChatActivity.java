@@ -42,7 +42,6 @@ public class ChatActivity extends AppCompatActivity {
     private byte[] pbkey;
     private byte[] userKey;
     private NumenaCryptoBox cryptoBox;
-    private NumenaKeyPair keyPair;
     private EditText messageField;
     private Button send;
     private ListView chatView;

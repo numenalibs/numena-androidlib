@@ -46,6 +46,13 @@ import static org.libsodium.jni.Sodium.crypto_sign_detached;
 
 public class ProtocolManager {
 
+    /**
+     * Uses methods to parse a serverhello and extract its' values to the ValuesManager
+     * @param msg
+     * @return
+     * @throws NumenaLibraryException
+     */
+
 
     public ServerHello extractServerHello(byte[] msg) throws NumenaLibraryException {
         ServerHello serverHello = parseServerHello(msg);
@@ -53,6 +60,12 @@ public class ProtocolManager {
         return serverHello;
 
     }
+
+    /**
+     * Gets the values from the serverhello and puts it inside the ValuesManager
+     * @param srvHello
+     * @throws NumenaLibraryException
+     */
 
     private void setKeysFromServerHello(ServerHello srvHello) throws NumenaLibraryException {
         ValuesManager vm = ValuesManager.getInstance();
@@ -76,6 +89,13 @@ public class ProtocolManager {
         vm.setServerIdentityPublicKey(srvIdentPubKey.toByteArray());
     }
 
+    /**
+     * Parses a serhello from a byte array
+     * @param msg
+     * @return
+     * @throws NumenaLibraryException
+     */
+
     public ServerHello parseServerHello(byte[] msg) throws NumenaLibraryException {
         BaseMessage basemessage = null;
         ServerHello srvHello = null;
@@ -95,6 +115,11 @@ public class ProtocolManager {
         }
     }
 
+    /**
+     * Creates a pair of connection keys
+     * @throws NumenaLibraryException
+     */
+
     public void createClientConnectionKeys() throws NumenaLibraryException {
         byte[] tempclient_connection_pk = new byte[Sodium.crypto_box_publickeybytes()];
         byte[] tempclient_connection_sk = new byte[Sodium.crypto_box_secretkeybytes()];
@@ -105,6 +130,13 @@ public class ProtocolManager {
         vm.setClientConnectionPublicKey(tempclient_connection_pk);
         vm.setClientConnectionSecretKey(tempclient_connection_sk);
     }
+
+    /**
+     * Creates a clientHelloHandshake from a serverhello.
+     * @param serverHello
+     * @return
+     * @throws NumenaLibraryException
+     */
 
     public ClientHello.Handshake buildClientHelloHandshake(ServerHello serverHello) throws NumenaLibraryException {
         //Generate a ClientHello.Handshake message and populate the fields
@@ -132,6 +164,13 @@ public class ProtocolManager {
         return clientHandshake;
     }
 
+    /**
+     * Creates a signedHandshake from input signature and clienthandshake
+     * @param clientHandshake
+     * @param inputDstSignature
+     * @return
+     */
+
     public ClientHello.SignedHandshake buildSignedHandshake(ClientHello.Handshake clientHandshake, byte[] inputDstSignature) {
         ClientHello.SignedHandshake.Builder signedHandshakeBuilder = ClientHello.SignedHandshake.newBuilder();
         signedHandshakeBuilder.setHandshake(clientHandshake);
@@ -142,11 +181,17 @@ public class ProtocolManager {
             signedHandshakeBuilder.setIdentityPublicKey(ByteString.copyFrom(valuesManager.getClientIdentityPublicKey()));
             signedHandshakeBuilder.setHandshakeSignature(ByteString.copyFrom(dstSignature));
         }
-        // 8.2 Check if we're communicating with organization server
+        // Check if we're communicating with organization server
         ClientHello.SignedHandshake signedHandshake = signedHandshakeBuilder.build();
         return signedHandshake;
     }
 
+    /**
+     * Creates a baseMessage containing a clientHello
+     * @param ciphertext
+     * @return
+     * @throws NumenaLibraryException
+     */
 
     public BaseMessage packClientHello(byte[] ciphertext) throws NumenaLibraryException {
         ValuesManager valuesManager = ValuesManager.getInstance();
@@ -159,6 +204,13 @@ public class ProtocolManager {
         basemessage_builder.setClientHello(client_hello);
         return basemessage_builder.build();
     }
+
+    /**
+     * Creates a baseMessage containing a ledgerinterface with type GETUSER
+     * @param query
+     * @param organizationId
+     * @return
+     */
 
     public BaseMessage getUsers(String query, byte[] organizationId) {
         byte[] emptyKey = new byte[0];
@@ -184,6 +236,12 @@ public class ProtocolManager {
         return basemsg;
     }
 
+    /**
+     * Creates a baseMessage containing a userevent with type REGISTER
+     * @param reg_user
+     * @return
+     */
+
     public BaseMessage register(LedgerInterface.UserEvent reg_user) {
         // Ledgerinterface
         LedgerInterface.Builder ledger_builder = LedgerInterface.newBuilder();
@@ -200,6 +258,12 @@ public class ProtocolManager {
         return basemsg;
     }
 
+    /**
+     * Creates a baseMessage containing a userevent with type UNREGISTER
+     * @param unreg_user
+     * @return
+     */
+
     public BaseMessage unregister(LedgerInterface.UserEvent unreg_user) {
         // LedgerInterface
         LedgerInterface.Builder ledger_builder = LedgerInterface.newBuilder();
@@ -215,6 +279,15 @@ public class ProtocolManager {
 
         return basemsg;
     }
+
+    /**
+     * Creates a LedgerInterface.User from input
+     * @param title
+     * @param publicKey
+     * @param organizationId
+     * @param appData
+     * @return
+     */
 
     public LedgerInterface.User userProto(String title, byte[] publicKey, byte[] organizationId, byte[] appData) {
         ByteString my_username = ByteString.copyFrom(title.getBytes());
@@ -319,6 +392,14 @@ public class ProtocolManager {
         return basemsg;
     }
 
+    /**
+     * Generates a lists of capability verifiers from a list of NumenaUsers
+     * @param users
+     * @param writePermission
+     * @param readPermission
+     * @return
+     */
+
     public List<Capability> generateVerifiers(List<NumenaUser> users, boolean writePermission, boolean readPermission) {
         // Capability
         List<Capability> verifiers = new ArrayList<>();
@@ -326,7 +407,6 @@ public class ProtocolManager {
         for (int i = 0; i < users.size(); i++) {
             NumenaUser tempUser = users.get(i);
             byte[] publickKey = tempUser.getPublicKey();
-            Log.d("VERIFIER", Utils.printByteArray(publickKey));
             String userName = tempUser.getUsername();
 
             Capability.Builder capability_builder = Capability.newBuilder();
@@ -342,6 +422,15 @@ public class ProtocolManager {
         return verifiers;
 
     }
+
+    /**
+     * Generates a basemessage containing a databaseinterface with type STORE
+     * @param verifiers
+     * @param organizationId
+     * @param appId
+     * @param toBeSaved
+     * @return
+     */
 
     public BaseMessage storeObject(List<Capability> verifiers, byte[] organizationId, byte[] appId, byte[] toBeSaved) {
         try {
@@ -386,6 +475,15 @@ public class ProtocolManager {
         }
     }
 
+    /**
+     * Generates a basemessage containing a databaseinteface with type GET
+     * @param own_id_pkey
+     * @param appId
+     * @param message_hash
+     * @param limit
+     * @return
+     */
+
     public BaseMessage getObject(byte[] own_id_pkey, byte[] appId, byte[] message_hash, int limit) {
         DatabaseInterface.GetObject.Builder get_obj_builder = DatabaseInterface.GetObject.newBuilder();
         // GetObject
@@ -428,6 +526,13 @@ public class ProtocolManager {
         return subBuilder;
     }
 
+    /**
+     * Sets a signature on a subscribe builder
+     * @param subBuilder
+     * @param signature
+     * @return
+     */
+
     public Facademessages.Subscribe setSignatureOnSubscribe(Facademessages.Subscribe.Builder subBuilder, byte[] signature) {
         subBuilder.setMsgSignature(ByteString.copyFrom(signature));
         return subBuilder.build();
@@ -463,8 +568,5 @@ public class ProtocolManager {
         AppMessage appmsg = appmsg_builder.build();
         return appmsg;
     }
-
-
-
 
 }
