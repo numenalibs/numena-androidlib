@@ -91,6 +91,11 @@ public class ChatActivity extends AppCompatActivity {
             public void onCompletion(NumenaResponse numenaResponse) {
                 Toast.makeText(ChatActivity.this, "SUBSCRIBE " + numenaResponse.getStatus(), Toast.LENGTH_SHORT).show();
             }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                Toast.makeText(ChatActivity.this, "SUBSCRIBE " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -128,6 +133,11 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onCompletion(NumenaResponse numenaResponse) {
                         Toast.makeText(ChatActivity.this, "STOREOBJECT " + numenaResponse.getStatus(), Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        Toast.makeText(ChatActivity.this, "STOREOBJECT " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
             }

@@ -49,14 +49,19 @@ public class NumenaMessageHelper {
         STATE = Constants.EXPECTING_SERVERHELLO;
     }
 
+
+    public void resetValues(){
+        STATE = Constants.EXPECTING_SERVERHELLO;
+        initiatingCall = true;
+        ValuesManager.getInstance().resetNonces();
+    }
+
     /**
      * Closes the connection and resets the initial values used when opening a the websocket.
      */
 
     public void closeConnection(){
-        STATE = Constants.EXPECTING_SERVERHELLO;
-        initiatingCall = true;
-        ValuesManager.getInstance().resetNonces();
+        resetValues();
         singleMessageManager.disconnectWebsocket();
     }
 
@@ -515,6 +520,11 @@ public class NumenaMessageHelper {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+
             }
         };
         return openingListener;

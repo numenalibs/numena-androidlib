@@ -84,6 +84,12 @@ public class UserSelectActivity extends AppCompatActivity {
                         Toast.makeText(activity, "QUERY " + numenaResponse.getStatus(), Toast.LENGTH_SHORT).show();
                         adapter.refreshData(numenaResponse.getNumenaObjects());
                     }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        Toast.makeText(activity, "QUERY " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+
+                    }
                 });
             }
         });

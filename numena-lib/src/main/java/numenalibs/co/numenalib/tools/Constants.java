@@ -25,6 +25,7 @@ public class Constants {
     public static final int SOCKETCONNECTTIMEOUT = 15000;
     public static final int MAXMESSAGEPAYLOADSIZE = 10000000;
     public static final int MAXFRAMEPAYLOADSIZE = 10000000;
+    public static final String NO_CONNECTION_AVAILABLE = "NOT CONNECTED TO SOCKET";
 
 
     /**
@@ -45,4 +46,5 @@ public class Constants {
      */
     public static final String BROADCASTCODE = "BROADCASTCODE";
     public static final int EXECUTEWORKERTHREAD = 123;
+    public static final int RESETCONNECTIONVALUES = 124;
 }

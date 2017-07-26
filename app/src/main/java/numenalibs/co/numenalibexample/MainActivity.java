@@ -89,6 +89,11 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("SKKEY", keyPair.getSecretKey().getKeyValue());
                         startActivity(intent);
                     }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        Toast.makeText(activity, "REGISTER " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 });
             }
         });
@@ -100,6 +105,11 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onCompletion(NumenaResponse numenaResponse) {
                         Toast.makeText(activity, "UNREGISTER " + numenaResponse.getStatus(), Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        Toast.makeText(activity, "UNREGISTER " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
             }
