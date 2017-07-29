@@ -3,12 +3,15 @@ package numenalibs.co.numenalib;
 
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 
 import java.util.LinkedList;
@@ -30,6 +33,7 @@ import numenalibs.co.numenalib.protocol.ProtocolManager;
 import numenalibs.co.numenalib.tools.BroadCaster;
 import numenalibs.co.numenalib.tools.CallbackManager;
 import numenalibs.co.numenalib.tools.Constants;
+import numenalibs.co.numenalib.tools.Utils;
 import numenalibs.co.numenalib.tools.ValuesManager;
 
 import static numenalibs.co.numenalib.NumenaMessageHelper.isLocked;
@@ -83,7 +87,7 @@ public class NumenaMessageHandler {
                         }
                     }
                 }
-            } else if(response == Constants.RESETCONNECTIONVALUES){
+            } else if (response == Constants.RESETCONNECTIONVALUES) {
                 numenaMessageHelper.resetValues();
             }
         }
@@ -113,11 +117,56 @@ public class NumenaMessageHandler {
     public void initNumenaValues(Context context) {
         ValuesManager valuesManager = ValuesManager.getInstance();
         valuesManager.initDatabase(context);
-        encryptionManager.setupKeys();
+        keyRead(context);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             ConnectionChangeReceiver connectionChangeReceiver = new ConnectionChangeReceiver();
             context.registerReceiver(connectionChangeReceiver,
                     new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        }
+    }
+
+    /**
+     * Writes the public and secretkeys for sharedprefs
+     * @param context
+     */
+
+    private void keyWriter(Context context) {
+        ValuesManager vm = ValuesManager.getInstance();
+        String publicKeyText = Utils.formatWithIsoEncoding(vm.getClientIdentityPublicKey());
+        String secretKeyText = Utils.formatWithIsoEncoding(vm.getClientIdentitySecretKey());
+        SharedPreferences prefs = context.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(Constants.SHARED_VALUE_IDKEY_PUBLIC, publicKeyText);
+        editor.putString(Constants.SHARED_VALUE_IDKEY_SECRET, secretKeyText);
+        Log.d("PUBLICKEY", "SAVED " + publicKeyText);
+        Log.d("SECRETKEY", "SAVED " + secretKeyText);
+        editor.commit();
+    }
+
+    /**
+     * Reads if any keys are available in the shared preferences and creates new if none are found.
+     * Then saves these new values in sharedprefs
+     * @param context
+     */
+
+    private void keyRead(Context context) {
+        Context con;
+        ValuesManager vm = ValuesManager.getInstance();
+        try {
+            con = context.createPackageContext(Constants.PREF_PACKAGE_NAME, 0);
+            SharedPreferences pref = con.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+            String publicKeyText = pref.getString(Constants.SHARED_VALUE_IDKEY_PUBLIC, "No Value");
+            String secretKeyText = pref.getString(Constants.SHARED_VALUE_IDKEY_SECRET, "No Value");
+            Log.d("PUBLICKEY", "FOUND " + publicKeyText);
+            Log.d("SECRETKEY", "FOUND " + secretKeyText);
+            byte[] publicKey = Utils.formatBackIsoEncoding(publicKeyText);
+            byte[] secretKey = Utils.formatBackIsoEncoding(secretKeyText);
+            vm.setClientIdentityPublicKey(publicKey);
+            vm.setClientIdentitySecretKey(secretKey);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.d("No keys found", "Creating new");
+            encryptionManager.setupKeys();
+            keyWriter(context);
         }
     }
 
