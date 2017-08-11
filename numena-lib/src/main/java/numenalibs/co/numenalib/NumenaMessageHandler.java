@@ -22,6 +22,7 @@ import numenalibs.co.numenalib.encryption.EncryptionManager;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.interfaces.ResultsListener;
 import numenalibs.co.numenalib.interfaces.NumenaChatHandler;
+import numenalibs.co.numenalib.models.NumenaKey;
 import numenalibs.co.numenalib.tools.ConnectionChangeReceiver;
 import numenalibs.co.numenalib.tools.NumenaCryptoBox;
 import numenalibs.co.numenalib.models.NumenaMethod;
@@ -33,11 +34,14 @@ import numenalibs.co.numenalib.protocol.ProtocolManager;
 import numenalibs.co.numenalib.tools.BroadCaster;
 import numenalibs.co.numenalib.tools.CallbackManager;
 import numenalibs.co.numenalib.tools.Constants;
+import numenalibs.co.numenalib.tools.NumenaProviderClient;
 import numenalibs.co.numenalib.tools.Utils;
 import numenalibs.co.numenalib.tools.ValuesManager;
 
 import static numenalibs.co.numenalib.NumenaMessageHelper.isLocked;
 import static numenalibs.co.numenalib.tools.Constants.BROADCASTCODE;
+import static numenalibs.co.numenalib.tools.Constants.CLIENT_IDENTITY_PUBLICKEY;
+import static numenalibs.co.numenalib.tools.Constants.CLIENT_IDENTITY_SECRETKEY;
 import static numenalibs.co.numenalib.tools.Constants.CONTACTTYPE_ADD;
 import static numenalibs.co.numenalib.tools.Constants.CONTACTTYPE_REMOVE;
 import static numenalibs.co.numenalib.tools.Constants.NO_CONNECTION_AVAILABLE;
@@ -130,43 +134,24 @@ public class NumenaMessageHandler {
      * @param context
      */
 
-    private void keyWriter(Context context) {
-        ValuesManager vm = ValuesManager.getInstance();
-        String publicKeyText = Utils.formatWithIsoEncoding(vm.getClientIdentityPublicKey());
-        String secretKeyText = Utils.formatWithIsoEncoding(vm.getClientIdentitySecretKey());
-        SharedPreferences prefs = context.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(Constants.SHARED_VALUE_IDKEY_PUBLIC, publicKeyText);
-        editor.putString(Constants.SHARED_VALUE_IDKEY_SECRET, secretKeyText);
-        Log.d("PUBLICKEY", "SAVED " + publicKeyText);
-        Log.d("SECRETKEY", "SAVED " + secretKeyText);
-        editor.commit();
-    }
-
-    /**
-     * Reads if any keys are available in the shared preferences and creates new if none are found.
-     * Then saves these new values in sharedprefs
-     * @param context
-     */
-
     private void keyRead(Context context) {
-        Context con;
-        ValuesManager vm = ValuesManager.getInstance();
-        try {
-            con = context.createPackageContext(Constants.PREF_PACKAGE_NAME, 0);
-            SharedPreferences pref = con.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-            String publicKeyText = pref.getString(Constants.SHARED_VALUE_IDKEY_PUBLIC, "No Value");
-            String secretKeyText = pref.getString(Constants.SHARED_VALUE_IDKEY_SECRET, "No Value");
-            Log.d("PUBLICKEY", "FOUND " + publicKeyText);
-            Log.d("SECRETKEY", "FOUND " + secretKeyText);
-            byte[] publicKey = Utils.formatBackIsoEncoding(publicKeyText);
-            byte[] secretKey = Utils.formatBackIsoEncoding(secretKeyText);
-            vm.setClientIdentityPublicKey(publicKey);
-            vm.setClientIdentitySecretKey(secretKey);
-        } catch (PackageManager.NameNotFoundException e) {
+        NumenaProviderClient numenaProviderClient = new NumenaProviderClient(context);
+        List<NumenaKey> numenaKeys = numenaProviderClient.lookupKeysFromProviders();
+        if(numenaKeys.isEmpty()){
             Log.d("No keys found", "Creating new");
             encryptionManager.setupKeys();
-            keyWriter(context);
+        }else {
+            Log.d("keys found", "Setting them");
+            ValuesManager vm = ValuesManager.getInstance();
+            for(NumenaKey key : numenaKeys){
+                byte[] keyValue = key.getKeyValue();
+                if(key.getKeyName().equals(CLIENT_IDENTITY_PUBLICKEY)){
+                    vm.setClientIdentityPublicKey(keyValue);
+                }
+                if(key.getKeyName().equals(CLIENT_IDENTITY_SECRETKEY)) {
+                    vm.setClientIdentitySecretKey(keyValue);
+                }
+            }
         }
     }
 

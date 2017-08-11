@@ -53,7 +53,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.insertWithOnConflict(TABLE_NAME, null, v, SQLiteDatabase.CONFLICT_REPLACE);
         }
         db.close();
-
     }
 
     /**
