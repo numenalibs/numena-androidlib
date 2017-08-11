@@ -17,7 +17,7 @@
         </receiver>
 
         <provider
-            android:authorities="numenalibs.co.numenalib.tools.NumenaProvider"
+            android:authorities="${applicationId}.NumenaProvider"
             android:name="numenalibs.co.numenalib.tools.NumenaProvider"
             android:exported="true"
             />

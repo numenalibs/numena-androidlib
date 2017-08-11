@@ -15,7 +15,6 @@ public class NumenaProvider extends ContentProvider {
     private DatabaseHelper dataBaseHelper = null;
     private static final String AUTH = "numenalibs.co.numenalib.tools.NumenaProvider";
     public static final Uri NUMENAPROVIDER_URI = Uri.parse("content://" + AUTH + "/" + DatabaseHelper.TABLE_NAME);
-
     final static int KEYS = 1;
 
     SQLiteDatabase db;
