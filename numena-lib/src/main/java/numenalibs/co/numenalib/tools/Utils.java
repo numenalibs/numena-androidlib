@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.util.Log;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -26,6 +27,25 @@ public class Utils {
         ByteBuffer buffer = ByteBuffer.allocate(24);
         buffer.putLong(x);
         return buffer.array();
+    }
+
+
+    public static String formatWithIsoEncoding(byte[] value){
+        try {
+            return new String(value, "ISO-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static byte[] formatBackIsoEncoding(String value){
+        try {
+            return value.getBytes("ISO-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static String printByteArray(byte[] input) {

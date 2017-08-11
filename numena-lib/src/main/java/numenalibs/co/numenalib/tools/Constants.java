@@ -26,6 +26,10 @@ public class Constants {
     public static final int MAXMESSAGEPAYLOADSIZE = 10000000;
     public static final int MAXFRAMEPAYLOADSIZE = 10000000;
     public static final String NO_CONNECTION_AVAILABLE = "NOT CONNECTED TO SOCKET";
+    public static final String PREF_PACKAGE_NAME= "numenalibs.co.numenalib";
+    public static final String SHARED_PREF_NAME= "numenakeyvalues";
+    public static final String SHARED_VALUE_IDKEY_PUBLIC= "idkey_public";
+    public static final String SHARED_VALUE_IDKEY_SECRET= "idkey_secret";
 
 
     /**

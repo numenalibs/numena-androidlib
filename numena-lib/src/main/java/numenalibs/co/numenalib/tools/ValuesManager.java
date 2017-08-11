@@ -4,6 +4,7 @@ package numenalibs.co.numenalib.tools;
 import android.content.Context;
 import android.util.Log;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -79,6 +80,7 @@ public class ValuesManager implements NumenaCommunicatorInterface {
             throw new NumenaLibraryException("Failing: Cannot get SHA-256 Encoding");
         }
     }
+
 
     public String getConnectionUrl() {
         return connectionUrl;
