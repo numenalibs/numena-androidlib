@@ -68,6 +68,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return c.getCount() >= 2;
     }
 
+    public Cursor getCursorOfKeys(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM " + TABLE_NAME + ";", null);
+        return c;
+    }
+
     /**
      * Queries every key from the database and returns a list of numenakeys.
      * @return
