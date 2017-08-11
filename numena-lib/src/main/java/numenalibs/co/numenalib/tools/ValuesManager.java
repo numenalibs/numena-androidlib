@@ -137,6 +137,8 @@ public class ValuesManager implements NumenaCommunicatorInterface {
 
     public void setClientIdentityPublicKey(byte[] clientIdentityPublicKey) {
         keys.put(Constants.CLIENT_IDENTITY_PUBLICKEY, clientIdentityPublicKey);
+        Log.d("PUBLICKEY", Utils.printByteArray(clientIdentityPublicKey));
+
     }
 
     public byte[] getClientIdentitySecretKey() {
@@ -145,6 +147,7 @@ public class ValuesManager implements NumenaCommunicatorInterface {
 
     public void setClientIdentitySecretKey(byte[] clientIdentitySecretKey) {
         keys.put(Constants.CLIENT_IDENTITY_SECRETKEY, clientIdentitySecretKey);
+        Log.d("SECRETKEY", Utils.printByteArray(clientIdentitySecretKey));
     }
 
     public int getLocalNonce() {
