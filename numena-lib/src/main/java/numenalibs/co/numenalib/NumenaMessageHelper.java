@@ -72,9 +72,7 @@ public class NumenaMessageHelper {
      */
 
     public void initConnection(ResultsListener<NumenaResponse> clientListener) {
-        MessageCallback messageCallback = new MessageCallback();
-        messageCallback.setListener(clientListener);
-        ResultsListener listener = setupListenerAndCallback(messageCallback);
+        ResultsListener listener = createNewListener(clientListener);
         singleMessageManager.setListener(listener);
         singleMessageManager.openWebsocket();
     }
@@ -504,7 +502,7 @@ public class NumenaMessageHelper {
     }
 
     /**
-     * Takes a callback and makes the resultlistener call the it upon success.
+     * Takes a callback and makes the resultlistener call it upon success.
      *
      * @param numenaMethod
      * @return

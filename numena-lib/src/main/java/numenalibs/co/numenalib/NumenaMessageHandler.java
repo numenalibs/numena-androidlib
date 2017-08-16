@@ -13,7 +13,6 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -101,10 +100,10 @@ public class NumenaMessageHandler {
         protocolManager = new ProtocolManager();
         encryptionManager = new EncryptionManager();
         singleMessageManager = new SingleMessageManager();
-        BroadCaster.getBroadCaster().registerObserver(mHandler);
         numenaMessageHelper = new NumenaMessageHelper(encryptionManager, protocolManager, singleMessageManager);
         callbackManager = new CallbackManager(numenaMessageHelper);
         numenaCryptoBox = new NumenaCryptoBox(encryptionManager, protocolManager);
+        BroadCaster.getBroadCaster().registerObserver(mHandler);
     }
 
     public NumenaCryptoBox getNumenaCryptoBox() {
@@ -113,7 +112,7 @@ public class NumenaMessageHandler {
 
     /**
      * Uses the context to initialise a SQLite database
-     * Also creates a pair of identitykeys
+     * Also creates a pair of identitykeys if needed.
      *
      * @param context
      */
@@ -130,25 +129,27 @@ public class NumenaMessageHandler {
     }
 
     /**
-     * Writes the public and secretkeys for sharedprefs
+     * Tries to find a provider with ID keys, if not then it creates new and sets them in
+     * ValuesManager and in the database.
+     *
      * @param context
      */
 
     private void keyRead(Context context) {
         NumenaProviderClient numenaProviderClient = new NumenaProviderClient(context);
         List<NumenaKey> numenaKeys = numenaProviderClient.lookupKeysFromProviders();
-        if(numenaKeys.isEmpty()){
+        if (numenaKeys.isEmpty()) {
             Log.d("No keys found", "Creating new");
             encryptionManager.setupKeys();
-        }else {
+        } else {
             Log.d("keys found", "Setting them");
             ValuesManager vm = ValuesManager.getInstance();
-            for(NumenaKey key : numenaKeys){
+            for (NumenaKey key : numenaKeys) {
                 byte[] keyValue = key.getKeyValue();
-                if(key.getKeyName().equals(CLIENT_IDENTITY_PUBLICKEY)){
+                if (key.getKeyName().equals(CLIENT_IDENTITY_PUBLICKEY)) {
                     vm.setClientIdentityPublicKey(keyValue);
                 }
-                if(key.getKeyName().equals(CLIENT_IDENTITY_SECRETKEY)) {
+                if (key.getKeyName().equals(CLIENT_IDENTITY_SECRETKEY)) {
                     vm.setClientIdentitySecretKey(keyValue);
                 }
             }
@@ -168,17 +169,12 @@ public class NumenaMessageHandler {
      * @param identitySecretKey
      * @param organisationId
      * @param appId
-     * @param clientlistener
+     * @param listener
      */
 
-    public void subscribe(@Nullable byte[] identityPublicKey, @Nullable byte[] identitySecretKey, byte[] organisationId, byte[] appId, NumenaChatHandler chatHandler, ResultsListener<NumenaResponse> clientlistener) {
-        if (ConnectionChangeReceiver.hasEthernetConnection) {
-            CallbackManager.SubscribeCallback subscribeCallback = callbackManager.makeSubscribeCallback(identityPublicKey, identitySecretKey, organisationId, appId, chatHandler, clientlistener);
-            forExecute.add(subscribeCallback);
-            BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
-        } else {
-            clientlistener.onFailure(new NumenaLibraryException("Failing: " + Constants.NO_CONNECTION_AVAILABLE));
-        }
+    public void subscribe(@Nullable byte[] identityPublicKey, @Nullable byte[] identitySecretKey, byte[] organisationId, byte[] appId, NumenaChatHandler chatHandler, ResultsListener<NumenaResponse> listener) {
+        CallbackManager.SubscribeCallback subscribeCallback = callbackManager.makeSubscribeCallback(identityPublicKey, identitySecretKey, organisationId, appId, chatHandler, listener);
+        addForQueue(subscribeCallback, listener);
     }
 
     /**
@@ -189,17 +185,12 @@ public class NumenaMessageHandler {
      * @param appId
      * @param messageHash
      * @param limit
-     * @param clientlistener
+     * @param listener
      */
 
-    public void getObject(@Nullable byte[] publicKey, byte[] appId, byte[] messageHash, int limit, ResultsListener<NumenaResponse> clientlistener) {
-        if (ConnectionChangeReceiver.hasEthernetConnection) {
-            CallbackManager.GetObjectCallback getObjectCallback = callbackManager.makeGetObjectCallback(publicKey, appId, messageHash, limit, clientlistener);
-            forExecute.add(getObjectCallback);
-            BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
-        } else {
-            clientlistener.onFailure(new NumenaLibraryException("Failing: " + Constants.NO_CONNECTION_AVAILABLE));
-        }
+    public void getObject(@Nullable byte[] publicKey, byte[] appId, byte[] messageHash, int limit, ResultsListener<NumenaResponse> listener) {
+        CallbackManager.GetObjectCallback getObjectCallback = callbackManager.makeGetObjectCallback(publicKey, appId, messageHash, limit, listener);
+        addForQueue(getObjectCallback, listener);
     }
 
 
@@ -216,13 +207,8 @@ public class NumenaMessageHandler {
      */
 
     public void storeObject(List<NumenaUser> numenaUsers, byte[] content, byte[] organisationId, byte[] appId, boolean writePermission, boolean readPermission, ResultsListener<NumenaResponse> listener) {
-        if (ConnectionChangeReceiver.hasEthernetConnection) {
-            CallbackManager.StoreObjectCallback storeObjectCallback = callbackManager.makeStoreObjectCallback(numenaUsers, content, organisationId, appId, writePermission, readPermission, listener);
-            forExecute.add(storeObjectCallback);
-            BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
-        } else {
-            listener.onFailure(new NumenaLibraryException("Failing: " + Constants.NO_CONNECTION_AVAILABLE));
-        }
+        CallbackManager.StoreObjectCallback storeObjectCallback = callbackManager.makeStoreObjectCallback(numenaUsers, content, organisationId, appId, writePermission, readPermission, listener);
+        addForQueue(storeObjectCallback, listener);
     }
 
     /**
@@ -234,13 +220,8 @@ public class NumenaMessageHandler {
      */
 
     public void removeContact(NumenaUser self, NumenaUser numenaUser, final ResultsListener<NumenaResponse> listener) {
-        if (ConnectionChangeReceiver.hasEthernetConnection) {
-            CallbackManager.ContactCallback contactCallback = callbackManager.makeContactsCallback(self, numenaUser, CONTACTTYPE_REMOVE, listener);
-            forExecute.add(contactCallback);
-            BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
-        } else {
-            listener.onFailure(new NumenaLibraryException("Failing: " + Constants.NO_CONNECTION_AVAILABLE));
-        }
+        CallbackManager.ContactCallback contactCallback = callbackManager.makeContactsCallback(self, numenaUser, CONTACTTYPE_REMOVE, listener);
+        addForQueue(contactCallback, listener);
     }
 
     /**
@@ -252,13 +233,8 @@ public class NumenaMessageHandler {
      */
 
     public void addContact(NumenaUser self, NumenaUser numenaUser, final ResultsListener<NumenaResponse> listener) {
-        if (ConnectionChangeReceiver.hasEthernetConnection) {
-            CallbackManager.ContactCallback contactCallback = callbackManager.makeContactsCallback(self, numenaUser, CONTACTTYPE_ADD, listener);
-            forExecute.add(contactCallback);
-            BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
-        } else {
-            listener.onFailure(new NumenaLibraryException("Failing: " + Constants.NO_CONNECTION_AVAILABLE));
-        }
+        CallbackManager.ContactCallback contactCallback = callbackManager.makeContactsCallback(self, numenaUser, CONTACTTYPE_ADD, listener);
+        addForQueue(contactCallback, listener);
     }
 
     /**
@@ -269,13 +245,8 @@ public class NumenaMessageHandler {
      */
 
     public void getUsers(final String query, byte[] organisationId, final ResultsListener<NumenaResponse> listener) {
-        if (ConnectionChangeReceiver.hasEthernetConnection) {
-            CallbackManager.GetUsersCallback getUsersCallback = callbackManager.makeGetUsersCallback(query, organisationId, listener);
-            forExecute.add(getUsersCallback);
-            BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
-        } else {
-            listener.onFailure(new NumenaLibraryException("Failing: " + Constants.NO_CONNECTION_AVAILABLE));
-        }
+        CallbackManager.GetUsersCallback getUsersCallback = callbackManager.makeGetUsersCallback(query, organisationId, listener);
+        addForQueue(getUsersCallback, listener);
     }
 
     /**
@@ -291,13 +262,8 @@ public class NumenaMessageHandler {
      */
 
     public void register(@Nullable final byte[] publicKey, @Nullable final byte[] secretKey, final String title, final byte[] organisationId, final byte[] appData, final ResultsListener<NumenaResponse> listener) {
-        if (ConnectionChangeReceiver.hasEthernetConnection) {
-            CallbackManager.RegisterCallback registerCallback = callbackManager.makeRegisterCallback(publicKey, secretKey, title, organisationId, appData, listener);
-            forExecute.add(registerCallback);
-            BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
-        } else {
-            listener.onFailure(new NumenaLibraryException("Failing: " + Constants.NO_CONNECTION_AVAILABLE));
-        }
+        CallbackManager.RegisterCallback registerCallback = callbackManager.makeRegisterCallback(publicKey, secretKey, title, organisationId, appData, listener);
+        addForQueue(registerCallback, listener);
     }
 
     /**
@@ -313,12 +279,25 @@ public class NumenaMessageHandler {
      */
 
     public void unregister(@Nullable final byte[] publicKey, @Nullable final byte[] secretKey, final String title, final byte[] organisationId, final byte[] appData, final ResultsListener<NumenaResponse> listener) {
+        CallbackManager.UnRegisterCallback unRegisterCallback = callbackManager.makeUnRegisterCallback(publicKey, secretKey, title, organisationId, appData, listener);
+        addForQueue(unRegisterCallback, listener);
+    }
+
+
+    /**
+     * Method for add a numenamethod for to the queue of methods to be executes.
+     * Does not add a method if there is no ethernet connection present.
+     *
+     * @param numenaMethod
+     * @param listener
+     */
+
+    private void addForQueue(NumenaMethod numenaMethod, ResultsListener listener) {
         if (ConnectionChangeReceiver.hasEthernetConnection) {
-            CallbackManager.UnRegisterCallback unRegisterCallback = callbackManager.makeUnRegisterCallback(publicKey, secretKey, title, organisationId, appData, listener);
-            forExecute.add(unRegisterCallback);
+            forExecute.add(numenaMethod);
             BroadCaster.getBroadCaster().broadcastToObservers(Constants.EXECUTEWORKERTHREAD);
         } else {
-            listener.onFailure(new NumenaLibraryException("Failing: " + Constants.NO_CONNECTION_AVAILABLE));
+            listener.onFailure(new NumenaLibraryException("Failing: " + NO_CONNECTION_AVAILABLE));
         }
     }
 }

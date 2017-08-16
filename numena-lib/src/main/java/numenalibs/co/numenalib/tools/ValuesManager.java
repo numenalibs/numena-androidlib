@@ -2,9 +2,7 @@ package numenalibs.co.numenalib.tools;
 
 
 import android.content.Context;
-import android.util.Log;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -13,10 +11,9 @@ import java.util.List;
 
 import numenalibs.co.numenalib.database.DatabaseHelper;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
-import numenalibs.co.numenalib.interfaces.NumenaCommunicatorInterface;
 import numenalibs.co.numenalib.models.NumenaKey;
 
-public class ValuesManager implements NumenaCommunicatorInterface {
+public class ValuesManager {
 
     private byte[] whitelist = Utils.hexStringToByteArray(Constants.WHITELISTTEXT);;
     private int localNonce;
@@ -57,6 +54,10 @@ public class ValuesManager implements NumenaCommunicatorInterface {
         return databaseHelper.identityKeysExists();
     }
 
+    /**
+     * Uses the databaseHelper to insert all values contained in the keys map into the database.
+     */
+
     public void storeKeysInDatabase(){
         for(String key : keys.keySet()){
             byte[] value = keys.get(key);
@@ -69,6 +70,14 @@ public class ValuesManager implements NumenaCommunicatorInterface {
             databaseHelper.insertValuesIntoKeys(key, value,keyHash);
         }
     }
+
+    /**
+     * Uses MessageDigest to make a SHA256 hash from the input byte array.
+     * Returns a string containing the hashed value
+     * @param key
+     * @return
+     * @throws NumenaLibraryException
+     */
 
     public String getHash(byte[] key) throws NumenaLibraryException {
         MessageDigest md = null;
@@ -90,30 +99,6 @@ public class ValuesManager implements NumenaCommunicatorInterface {
         this.connectionUrl = connectionUrl;
     }
 
-    @Override
-    public void setAppKeys(HashMap<String, byte[]> keys) {
-
-    }
-
-    @Override
-    public HashMap<String, byte[]> getAppKeys() {
-        return null;
-    }
-
-    @Override
-    public HashMap<String, byte[]> getDeviceKeys() {
-        return null;
-    }
-
-    @Override
-    public void connectToAidl() {
-
-    }
-
-    @Override
-    public void disconnectFromAidl() {
-
-    }
 
     public byte[] getOrganisationId() {
         return organisationId;
@@ -137,7 +122,6 @@ public class ValuesManager implements NumenaCommunicatorInterface {
 
     public void setClientIdentityPublicKey(byte[] clientIdentityPublicKey) {
         keys.put(Constants.CLIENT_IDENTITY_PUBLICKEY, clientIdentityPublicKey);
-        Log.d("PUBLICKEY", Utils.printByteArray(clientIdentityPublicKey));
 
     }
 
@@ -147,7 +131,6 @@ public class ValuesManager implements NumenaCommunicatorInterface {
 
     public void setClientIdentitySecretKey(byte[] clientIdentitySecretKey) {
         keys.put(Constants.CLIENT_IDENTITY_SECRETKEY, clientIdentitySecretKey);
-        Log.d("SECRETKEY", Utils.printByteArray(clientIdentitySecretKey));
     }
 
     public int getLocalNonce() {

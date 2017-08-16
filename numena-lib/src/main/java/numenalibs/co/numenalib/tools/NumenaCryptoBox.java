@@ -19,6 +19,8 @@ import numenalibs.co.numenalib.models.NumenaKey;
 import numenalibs.co.numenalib.models.NumenaKeyPair;
 import numenalibs.co.numenalib.protocol.ProtocolManager;
 
+import static numenalibs.co.numenalib.tools.Constants.ENCRYPTION_KEY_LENGTH;
+
 public class NumenaCryptoBox {
 
     private List<NumenaKey> secretKeyList = new ArrayList<>();
@@ -45,10 +47,10 @@ public class NumenaCryptoBox {
      */
 
     public NumenaKeyPair generateAppKey(String publickeyName, String secretKeyName) {
-        byte[] PK = new byte[32];
-        byte[] SK = new byte[32];
-        Sodium.randombytes(PK, 32);
-        Sodium.randombytes(SK, 32);
+        byte[] PK = new byte[ENCRYPTION_KEY_LENGTH];
+        byte[] SK = new byte[ENCRYPTION_KEY_LENGTH];
+        Sodium.randombytes(PK, ENCRYPTION_KEY_LENGTH);
+        Sodium.randombytes(SK, ENCRYPTION_KEY_LENGTH);
         Sodium.crypto_box_keypair(PK, SK);
         String pKeyHash = null;
         String sKeyHash = null;

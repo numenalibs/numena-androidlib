@@ -12,6 +12,11 @@ import static numenalibs.co.numenalib.tools.Constants.BROADCASTCODE;
 
 public class BroadCaster {
 
+    /**
+     * A singleton class to be used between worker and master threads.
+     * Also used by connectionchangereceiver class.
+     */
+
     private static BroadCaster broadCaster;
     private List<Handler> observers = new ArrayList<>();
     public void registerObserver(Handler observer) {
@@ -25,6 +30,11 @@ public class BroadCaster {
         return broadCaster;
     }
 
+
+    /**
+     * Broadcasts to every observer that has registered itself.
+     * @param broadcastCode
+     */
 
     public void broadcastToObservers(int broadcastCode){
         for(Handler handler : observers){

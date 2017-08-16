@@ -11,6 +11,7 @@ public class Constants {
 
     public final static String MESSAGETYPE_CLIENTHELLO_HANDSHAKE = "ClientHello.Handshake";
     public final static String SHA256_ENCODING = "SHA-256";
+    public final static String ISO_ENCODING = "ISO-8859-1";
     public static final int CRYPTO_BOX_MACBYTES = 16;
     public static final int EXPECTING_SERVERHELLO = 1;
     public static final int EXPECTING_MESSAGE = 2;
@@ -30,7 +31,11 @@ public class Constants {
     public static final String SHARED_PREF_NAME= "numenakeyvalues";
     public static final String SHARED_VALUE_IDKEY_PUBLIC= "idkey_public";
     public static final String SHARED_VALUE_IDKEY_SECRET= "idkey_secret";
-
+    public static final String NUMENA_INTENT_REQUEST_VALUES = "co.numenalibs_intent_request";
+    public static final String NUMENA_INTENT_GIVEN_VALUES = "co.numenalibs_intent_given";
+    public static final String NUMENA_PROVIDER = "NumenaProvider";
+    public static final String EMPTY_INPUT = " EMPTY INPUT ";
+    public static final int ENCRYPTION_KEY_LENGTH = 32;
 
     /**
      * KEYNAMES

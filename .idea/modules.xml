@@ -6,7 +6,6 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/libsodium-jni-release/libsodium-jni-release.iml" filepath="$PROJECT_DIR$/libsodium-jni-release/libsodium-jni-release.iml" />
       <module fileurl="file://$PROJECT_DIR$/numena-androidlib.iml" filepath="$PROJECT_DIR$/numena-androidlib.iml" />
-      <module fileurl="file://$PROJECT_DIR$/numena-androidlib.iml" filepath="$PROJECT_DIR$/numena-androidlib.iml" />
       <module fileurl="file://$PROJECT_DIR$/numena-lib/numena-lib.iml" filepath="$PROJECT_DIR$/numena-lib/numena-lib.iml" />
     </modules>
   </component>

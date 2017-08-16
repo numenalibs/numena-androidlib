@@ -78,12 +78,6 @@ public class ProtocolManager {
         }
         vm.getOrganisationKeys().put("numena", srvHello.getServerOrganizationPublicKey().toByteArray());
 
-        /* this step makes no sense at all.
-        //Verify that the server_organization_public_key belongs to the intended server
-        if (!Arrays.equals(vm.getOrganisationKeys().get("numena"), srvHello.getServerOrganizationPublicKey().toByteArray())) {
-            throw new NumenaLibraryException("Failing: No matching organisationkey for organisation");
-        }
-        */
         //Verify that the signature on the ServerHello.Handshake.server_identity_public_key is correct
         ByteString srvIdentPubKey = handshake.getServerIdentityPublicKey();
         vm.setServerIdentityPublicKey(srvIdentPubKey.toByteArray());

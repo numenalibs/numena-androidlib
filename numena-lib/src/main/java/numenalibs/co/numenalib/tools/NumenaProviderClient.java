@@ -20,6 +20,7 @@ import numenalibs.co.numenalib.database.DatabaseHelper;
 import numenalibs.co.numenalib.exceptions.NumenaLibraryException;
 import numenalibs.co.numenalib.models.NumenaKey;
 
+import static numenalibs.co.numenalib.tools.Constants.NUMENA_PROVIDER;
 import static numenalibs.co.numenalib.tools.NumenaProvider.NUMENAPROVIDER_URI;
 
 
@@ -31,6 +32,11 @@ public class NumenaProviderClient {
         this.context = context;
     }
 
+    /**
+     * Extracts a list of identitykeys from the closest provider with NumenaProvider in its' name.
+     * @return
+     */
+
     public List<NumenaKey> lookupKeysFromProviders() {
         String tempAuth = null;
         Uri providerUri = null;
@@ -40,8 +46,7 @@ public class NumenaProviderClient {
             ProviderInfo[] providers = pack.providers;
             if (providers != null) {
                 for (ProviderInfo provider : providers) {
-                    if (provider.authority.contains("NumenaProvider") && !provider.authority.contains(context.getPackageName())) {
-                        Log.d("Example", "provider: " + provider.authority);
+                    if (provider.authority.contains(NUMENA_PROVIDER) && !provider.authority.contains(context.getPackageName())) {
                         tempAuth = provider.authority;
                         providerUri = Uri.parse("content://" + tempAuth + "/" + DatabaseHelper.TABLE_NAME);
                         try {
@@ -56,6 +61,15 @@ public class NumenaProviderClient {
         }
         return keys;
     }
+
+    /**
+     * Looks up a ContentResolver on the given Uri and extracts data to a list of numenakeys.
+     * Throws a numenalibraryexception if there is a problem with resolving the content provider
+     * on the given Uri.
+     * @param uri
+     * @return
+     * @throws NumenaLibraryException
+     */
 
     private List<NumenaKey> getAllKeysFromProvider(Uri uri) throws NumenaLibraryException {
         List<NumenaKey> keys = new ArrayList<>();

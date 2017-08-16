@@ -12,6 +12,7 @@ import numenalibs.co.numenalib.database.DatabaseHelper;
 
 public class NumenaProvider extends ContentProvider {
 
+
     private DatabaseHelper dataBaseHelper = null;
     private static final String AUTH = "numenalibs.co.numenalib.tools.NumenaProvider";
     public static final Uri NUMENAPROVIDER_URI = Uri.parse("content://" + AUTH + "/" + DatabaseHelper.TABLE_NAME);
@@ -37,6 +38,16 @@ public class NumenaProvider extends ContentProvider {
         dataBaseHelper = new DatabaseHelper(context, "");
         return true;
     }
+
+    /**
+     * Looks up all keys belonging to the apps database and returns the cursor
+     * @param uri
+     * @param projection
+     * @param selection
+     * @param selectionArgs
+     * @param sortOrder
+     * @return
+     */
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {

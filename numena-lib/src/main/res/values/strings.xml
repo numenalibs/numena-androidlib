@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">NumenaLib</string>
+    <string name="shareLabel">numenalabel</string>
 </resources>
