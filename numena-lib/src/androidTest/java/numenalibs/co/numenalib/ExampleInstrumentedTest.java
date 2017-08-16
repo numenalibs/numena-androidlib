@@ -56,7 +56,7 @@ public class ExampleInstrumentedTest {
 
             @Override
             public void onFailure(Throwable throwable) {
-                assertEquals(false, false);
+                assertEquals(true, false);
 
             }
         });
@@ -98,7 +98,7 @@ public class ExampleInstrumentedTest {
 
             @Override
             public void onFailure(Throwable throwable) {
-                assertEquals(false,false);
+                assertEquals(true,false);
             }
         });
 
