@@ -9,8 +9,13 @@ import android.util.Log;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import numenalibs.co.numenalib.interfaces.ResultsListener;
+import numenalibs.co.numenalib.models.NumenaObject;
 import numenalibs.co.numenalib.models.NumenaResponse;
+import numenalibs.co.numenalib.models.NumenaUser;
 import numenalibs.co.numenalib.tools.Constants;
 
 import static org.junit.Assert.*;
@@ -91,6 +96,12 @@ public class ExampleInstrumentedTest {
                     value = true;
                 }
                 assertEquals(true, value);
+                List<NumenaUser> numenaUserList = new ArrayList<NumenaUser>();
+                for(NumenaObject object : result.getNumenaObjects()){
+                    numenaUserList.add((NumenaUser) object);
+                }
+                sendMessageToUser(numenaUserList);
+
             }
 
             @Override
@@ -98,7 +109,24 @@ public class ExampleInstrumentedTest {
                 assertEquals(true, false);
             }
         });
+    }
 
+    private void sendMessageToUser(List<NumenaUser> numenaUser){
+        numena.getMessageHandler().storeObject(numenaUser, "test".getBytes(), TESTORGANISATION, TESTAPPID, true, true, new ResultsListener<NumenaResponse>() {
+            @Override
+            public void onCompletion(NumenaResponse result) {
+                boolean value = false;
+                if (result.getStatus().equals(Constants.RESPONSE_SUCCESS)) {
+                    value = true;
+                }
+                assertEquals(true, value);
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                assertEquals(true, false);
+            }
+        });
 
     }
 }

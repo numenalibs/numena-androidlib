@@ -19,10 +19,7 @@ public class ConnectionChangeReceiver extends BroadcastReceiver {
         hasEthernetConnection = isOnline(context);
         if(!hasEthernetConnection){
             BroadCaster.getBroadCaster().broadcastToObservers(Constants.RESETCONNECTIONVALUES);
-        }else {
-            Log.d("CONMANAGEr", "HAS CONNECTION");
         }
-
     }
 
     /**
