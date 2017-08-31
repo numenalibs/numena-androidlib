@@ -148,7 +148,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        numena.getMessageHandler().closeSocket();
+        numena.getMessageHandler().closeSocket(this);
     }
 
     private void setupValues(){

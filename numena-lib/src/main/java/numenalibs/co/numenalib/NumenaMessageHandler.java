@@ -95,6 +95,7 @@ public class NumenaMessageHandler {
             }
         }
     };
+    private ConnectionChangeReceiver connectionChangeReceiver;
 
     public NumenaMessageHandler() {
         protocolManager = new ProtocolManager();
@@ -121,8 +122,12 @@ public class NumenaMessageHandler {
         ValuesManager valuesManager = ValuesManager.getInstance();
         valuesManager.initDatabase(context);
         keyRead(context);
+
+        connectionChangeReceiver = new ConnectionChangeReceiver();
+        context.registerReceiver(connectionChangeReceiver,
+                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            ConnectionChangeReceiver connectionChangeReceiver = new ConnectionChangeReceiver();
+            connectionChangeReceiver = new ConnectionChangeReceiver();
             context.registerReceiver(connectionChangeReceiver,
                     new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         }
@@ -156,7 +161,8 @@ public class NumenaMessageHandler {
         }
     }
 
-    public void closeSocket() {
+    public void closeSocket(Context context) {
+        context.unregisterReceiver(connectionChangeReceiver);
         numenaMessageHelper.closeConnection();
     }
 

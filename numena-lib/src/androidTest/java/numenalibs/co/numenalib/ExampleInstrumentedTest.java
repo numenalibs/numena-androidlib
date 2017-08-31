@@ -26,7 +26,7 @@ public class ExampleInstrumentedTest {
     public static byte[] TESTORGANISATION = "ExAmPleUnitTest".getBytes();
     public static byte[] TESTAPPID = "ExAmPleUnitTest".getBytes();
     public static byte[] TESTAPPDATA = "ExAmPleUnitTest".getBytes();
-    public static String TESTNAME = "ExAmPleUnitTest";
+    public static String TESTNAME = "ExAmPleUnitTestss";
 
     private Numena numena = null;
 
@@ -59,45 +59,43 @@ public class ExampleInstrumentedTest {
 
             }
         });
-
     }
 
 
-    private void testUnRegister(){
+    private void testUnRegister() {
         numena.getMessageHandler().unregister(null, null, TESTNAME, TESTORGANISATION, TESTAPPDATA, new ResultsListener<NumenaResponse>() {
             @Override
             public void onCompletion(NumenaResponse result) {
                 boolean value = false;
-                if(result.getStatus().equals(Constants.RESPONSE_SUCCESS)) {
+                if (result.getStatus().equals(Constants.RESPONSE_SUCCESS)) {
                     value = true;
                 }
-                assertEquals(true,value);
-
+                assertEquals(true, value);
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                assertEquals(true,false);
+                assertEquals(true, false);
             }
         });
 
     }
 
 
-    private void testGetUsers(){
+    private void testGetUsers() {
         numena.getMessageHandler().getUsers("", TESTORGANISATION, new ResultsListener<NumenaResponse>() {
             @Override
             public void onCompletion(NumenaResponse result) {
                 boolean value = false;
-                if(result.getStatus().equals(Constants.RESPONSE_SUCCESS)) {
+                if (result.getStatus().equals(Constants.RESPONSE_SUCCESS)) {
                     value = true;
                 }
-                assertEquals(true,value);
+                assertEquals(true, value);
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                assertEquals(true,false);
+                assertEquals(true, false);
             }
         });
 

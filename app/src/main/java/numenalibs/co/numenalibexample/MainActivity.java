@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
+        numena.getMessageHandler().closeSocket(this);
         super.onStop();
-        numena.getMessageHandler().closeSocket();
     }
 }
